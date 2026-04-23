@@ -1,6 +1,7 @@
 library(dplyr)
 library(ggplot2)
 library(here)
+library(pheatmap)
 library(Seurat)
 library(scAnalysisR)
 
@@ -136,4 +137,29 @@ pdf(
   height = 6
 )
 print(ferret_majority_barplot)
+dev.off()
+
+# Get DE heatmap of newly labeled majority cell type
+ferret_majority_heatmap <-
+  get_de_heatmap(
+    seurat_object = ferret_final_majority,
+    group_by = "majority_celltype",
+    n = 100,
+    upregulated = TRUE,
+    palette = blue_yellow,
+    custom_order = c(
+      "T lymphocyte", "Delta", "Beta", "Alpha", "B lymphocyte",
+      "Ductal Immature", "Mesenchyme Subtype 1", "Ductal Proliferating",
+      "Acinar Proliferating", "Mesenchyme Subtype 2", "Endothelial Lymphatic",
+      "Acinar Immature", "Acinar Maturing", "Acinar Progenitor",
+      "Pancreatic Progenitor"
+    )
+  )
+
+pdf(
+  file = file.path(image_dir, "ferret_majority_heatmap.pdf"),
+  width = 15,
+  height = 8
+)
+print(ferret_majority_heatmap)
 dev.off()
