@@ -44,14 +44,12 @@ published_object <- readRDS(here("human-fetal-panc-allcells.rds"))
 pub_cells <- Cells(published_object)
 subset_seurat <- subset(merged_so, cells = pub_cells)
 
-# Add the metadata from the published object to the subset seurat object
-pub_meta <- pub_seurat@meta.data[pub_cells, , drop = FALSE]
-for (col in colnames(pub_meta)) {
-  subset_seurat <- AddMetaData(subset_seurat,
-    metadata = pub_meta[[col]],
-    col.name = col
-  )
-}
+# Match metadata rows to the exact cell order in subset_seurat
+matched_cells <- Cells(subset_seurat)
+pub_meta <- pub_seurat@meta.data[matched_cells, , drop = FALSE]
+
+# Direct assignment of metadata
+subset_seurat@meta.data <- pub_meta
 
 # Second round of SCTransform
 subset_seurat <- SCTransform(subset_seurat)
