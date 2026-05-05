@@ -1,0 +1,178 @@
+---
+title: "Slingshot analysis of ferret pancreatic dataset, after integration with human dataset"
+date: "`r Sys.Date()`"
+author: "Chris Hill"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(biomaRt)
+library(cowplot)
+library(dplyr)
+library(ggbeeswarm)
+library(ggplot2)
+library(ggrastr)
+library(grid)
+library(here)
+library(JASPAR2020)
+library(scAnalysisR)
+library(Seurat)
+library(slingshot)
+library(TFBSTools)
+library(tradeSeq)
+
+source(here("06_ferret_lineages_helpers.R"))
+ggplot2::theme_set(ggplot2::theme_classic(base_size = 10))
+options(Seurat.object.assay.version = "v3")
+
+# Useful directories
+save_dir <- here("plots")
+data_dir <- here("rds_objects")
+fitgam_dir <- here("fitgam_objects")
+
+# Load in the final Seurat object
+ferret_subset <- readRDS(file.path(data_dir, "06_final_ferret.rds"))
+```
+
+```{r "Get analysis plots", fig.width=10,fig.height=4, echo = FALSE, include = FALSE}
+# Subset the ductal clusters from the combined object
+ductal_clusters <- c(9, 0, 5, 12, 17)
+cluster_subset <- subset(ferret_subset,
+  subset = seurat_clusters %in% ductal_clusters
+)
+
+# Convert to single cell experiment
+sce <- as.SingleCellExperiment(cluster_subset)
+
+# Extract only the top 15 PCs for slingshot object
+pca_subset <- reducedDim(sce, "PCA")[, 1:15]
+```
+
+# Ductal Lineage {.tabset}
+```{r "Ferret new pseudotime S9E0", fig.width=12,fig.height=7, echo = FALSE, warning = FALSE, message = FALSE}
+# Load in fitgam calculations
+fitgam_sce <- readRDS(here(file.path(
+  fitgam_dir,
+  "fitgam_ferret_ductal_S9E0.rda"
+)))
+
+# Calculate lineage associations from query genes
+query_names <- get_query_names(cluster_subset, cluster_number = 9)
+lineage_assocRes <- associationTest(fitgam_sce, lineages = TRUE)
+
+# Get the slingshot curves from the subset Seurat object
+curves <- get_curves(
+  seurat_object = cluster_subset,
+  sce = sce,
+  reduced_dim = pca_subset,
+  reduction = "umap",
+  start_cluster = 9,
+  end_cluster = 0
+)
+```
+
+## S9E0 L3
+```{r "lineage_plot L3 S9E0", fig.width=12,fig.height=5, echo = FALSE}
+# Calculate lineage 3 for the ductal slingshot curves
+lineage_plot <- getplots(
+  sce = sce,
+  slingshot_sce = curves$slingshot_sce,
+  all_curves = curves$all_curves,
+  seurat_object = ferret_subset,
+  slingshot_seurat = cluster_subset,
+  dimension = "umap",
+  lineage = 3
+)
+
+# Print slingshot lineage plot
+print(lineage_plot)
+```
+
+```{r "ductal lineage 3 plotting S9E0 heatmap", fig.width=10,fig.height=12, echo = FALSE}
+# Create lineage heatmaps
+plots <- make_lineage_heatmaps(
+  slingshot_sce = curves$slingshot_sce,
+  gene_list = query_names,
+  object = cluster_subset,
+  lineage = 3,
+  lineage_asso_res = lineage_assocRes,
+  waldcutoff = 200,
+  pval_cutoff = 0.05,
+  save_dir = save_dir,
+  fraction = 150
+)
+
+# Print significant genes heatmap
+print(plots$heatmap)
+```
+
+# Acinar Lineage {.tabset}
+
+```{r "Get analysis plots acinar", fig.width=10,fig.height=4, echo = FALSE, include = FALSE}
+# Subset to acinar clusters only in combined dataset
+acinar_clusters <- c(9, 4, 14, 1, 16, 8, 11, 10)
+cluster_subset <- subset(ferret_subset,
+  subset = seurat_clusters %in% acinar_clusters
+)
+
+# Convert to single cell experiment
+sce <- as.SingleCellExperiment(cluster_subset)
+
+# Extract only the top 15 PCs for slingshot object
+pca_subset <- reducedDim(sce, "PCA")[, 1:15]
+```
+
+```{r "acinar S9E10 pseudotime", fig.width=12,fig.height=7, echo = FALSE, warning = FALSE, message = FALSE}
+# Load in fitgam calculations
+fitgam_sce <- readRDS(here(fitgam_dir, "fitgam_ferret_acinar_S9E10.rda"))
+
+# Calculate lineage associations from query genes
+query_names <- get_query_names(cluster_subset, cluster_number = 9)
+lineage_assocRes <- associationTest(fitgam_sce, lineages = TRUE)
+
+# Get the slingshot curves from the subset Seurat object
+curves <- get_curves(
+  seurat_object = cluster_subset,
+  sce = sce,
+  reduced_dim = pca_subset,
+  reduction = "umap",
+  start_cluster = 9,
+  end_cluster = 10
+)
+```
+
+## S9E10 L2
+```{r "acinar lineage 2 plotting S9E10 lineage", fig.width=12,fig.height=5, echo = FALSE}
+# Calculate lineage 2 for the ductal slingshot curves
+lineage_plot <- getplots(
+  sce = sce,
+  slingshot_sce = curves$slingshot_sce,
+  all_curves = curves$all_curves,
+  seurat_object = ferret_subset,
+  slingshot_seurat = cluster_subset,
+  dimension = "umap",
+  lineage = 2
+)
+
+# Print slingshot lineage plot
+print(lineage_plot)
+```
+
+```{r "acinar lineage 2 plotting S9E10 heatmap", fig.width=10,fig.height=12, echo = FALSE}
+# Create lineage heatmaps
+plots <- make_lineage_heatmaps(
+  slingshot_sce = curves$slingshot_sce,
+  gene_list = query_names,
+  object = cluster_subset,
+  lineage = 2,
+  lineage_asso_res = lineage_assocRes,
+  waldcutoff = 200,
+  pval_cutoff = 0.05,
+  save_dir = save_dir,
+  fraction = 150
+)
+
+# Print significant genes heatmap
+print(plots$heatmap)
+```
