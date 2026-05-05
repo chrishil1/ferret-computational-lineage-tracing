@@ -7,3 +7,5 @@
 *.rds
 *.csv
 TODOs.md
+plots/
+*.html
