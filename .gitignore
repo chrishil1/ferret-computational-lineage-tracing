@@ -5,7 +5,8 @@
 .DS_Store
 *.Rproj
 *.rds
-*.csv
 TODOs.md
 plots/
 *.html
+*.h5ad
+csv_files
