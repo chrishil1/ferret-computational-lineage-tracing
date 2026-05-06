@@ -9,6 +9,7 @@ mpl.rcParams["pdf.fonttype"] = 42  # TrueType font
 mpl.rcParams["ps.fonttype"] = 42
 mpl.rcParams["svg.fonttype"] = "none"
 
+# Define palette to be used in plotting
 human_palette = {
     "Acinar Immature": "#e64463",
     "Acinar Maturing": "#62be4a",
@@ -61,8 +62,9 @@ def ferret_acinar():
 
     Writes:
         figures/projection_ferret_acinar.svg
-        Several .csv file that detail driver genes for each terminal state
-        Several .pdf files that highlight different parts of the fate determination
+        Several .csv files that detail driver genes for each terminal state
+        Several .pdf files that highlight different parts of the fate
+        determination
     """
 
     # Load in pseudotime and weights for this specific acinar lineage
@@ -105,11 +107,11 @@ def ferret_acinar():
         add_margin=0.02,
     )
 
-    # Instantiate the GPCCA esimator and fit to the clusters using majority celltype
+    # Instantiate the GPCCA esimator and fit to the clusters using celltype
     g = cr.estimators.GPCCA(pk)
     g.fit(cluster_key="majority_celltype", n_states=5)
 
-    # Manually set the terminal states after the fit has taken place, calculate fate probabilities
+    # Manually set the terminal states after fit, calculate fate probabilities
     g.set_terminal_states(
         states=[
             "Acinar Proliferating",
@@ -143,7 +145,7 @@ def ferret_acinar():
         save="ferret_acinar_circular_projection.pdf",
     )
 
-    # Name all clusters in the dataset to be driving factors when calculating lineage drivers
+    # Name all celltypes to be driving factors when calculating lineage drivers
     driver_clusters = [
         "Acinar Proliferating",
         "Acinar Immature",
@@ -167,7 +169,7 @@ def ferret_acinar():
     adata_ferret_acinar.obs["fate_probabilities_ductal_immature"] = (
         g.fate_probabilities["Ductal Immature"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_acinar,
         basis="umap",
@@ -196,7 +198,7 @@ def ferret_acinar():
     adata_ferret_acinar.obs["fate_probabilities_acinar_maturing"] = (
         g.fate_probabilities["Acinar Maturing"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_acinar,
         basis="umap",
@@ -220,7 +222,7 @@ def ferret_acinar():
     adata_ferret_acinar.obs["fate_probabilities_acinar_proliferating"] = (
         g.fate_probabilities["Acinar Proliferating"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_acinar,
         basis="umap",
@@ -242,7 +244,7 @@ def ferret_acinar():
     adata_ferret_acinar.obs["fate_probabilities_pancreatic_progenitor"] = (
         g.fate_probabilities["Pancreatic Progenitor"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_acinar,
         basis="umap",
@@ -264,7 +266,7 @@ def ferret_acinar():
     adata_ferret_acinar.obs["fate_probabilities_endothelial_lympathic"] = (
         g.fate_probabilities["Endothelial Lymphatic"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_acinar,
         basis="umap",
@@ -350,7 +352,7 @@ def ferret_ductal():
     Loads pseudotime, lineage weights, and AnnData from disk, computes a
     PseudotimeKernel transition matrix, fits a GPCCA estimator with 3 terminal
     states (Ductal Immature_1, Ductal Proliferating, Ductal Immature_2), and
-    computes fate probabilities and lineage driver genes for each terminal state.
+    compute fate probabilities and lineage driver genes for each terminal state.
     Saves all plots and driver gene tables to disk.
 
     Reads:
@@ -361,7 +363,8 @@ def ferret_ductal():
     Writes:
         figures/projection_ferret_ductal.svg
         Several .csv file that detail driver genes for each terminal state
-        Several .pdf files that highlight different parts of the fate determination
+        Several .pdf files that highlight different parts of the fate
+        determination
     """
 
     # Load in pseudotime and weights for this specific ductal lineage
@@ -404,11 +407,11 @@ def ferret_ductal():
         add_margin=0.02,
     )
 
-    # Instantiate the GPCCA esimator and fit to the clusters using majority celltype
+    # Instantiate the GPCCA esimator and fit to the clusters using celltype
     g = cr.estimators.GPCCA(pk)
     g.fit(cluster_key="majority_celltype", n_states=4)
 
-    # Manually set the terminal states after the fit has taken place, calculate fate probabilities
+    # Manually set the terminal states after fit, calculate fate probabilities
     g.set_terminal_states(
         states=["Ductal Immature_1", "Ductal Proliferating", "Ductal Immature_2"]
     )
@@ -436,7 +439,7 @@ def ferret_ductal():
         save="ferret_ductal_circular_projection.pdf",
     )
 
-    # Name all clusters in the dataset to be driving factors when calculating lineage drivers
+    # Name all celltypes to be driving factors when calculating lineage drivers
     driver_clusters = [
         "Ductal Immature",
         "Ductal Proliferating",
@@ -456,7 +459,7 @@ def ferret_ductal():
     adata_ferret_ductal.obs["fate_probabilities_ductal_immature_1"] = (
         g.fate_probabilities["Ductal Immature_1"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_ductal,
         basis="umap",
@@ -481,7 +484,7 @@ def ferret_ductal():
     adata_ferret_ductal.obs["fate_probabilities_ductal_immature_2"] = (
         g.fate_probabilities["Ductal Immature_2"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_ductal,
         basis="umap",
@@ -506,7 +509,7 @@ def ferret_ductal():
     adata_ferret_ductal.obs["fate_probabilities_ductal_proliferating"] = (
         g.fate_probabilities["Ductal Proliferating"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_ductal,
         basis="umap",
@@ -581,9 +584,6 @@ def ferret_ductal():
     )
 
 
-################################################
-# Human Acinar pseudotime and cellrank mapping #
-################################################
 def human_acinar():
     """
     Runs CellRank trajectory analysis on human acinar pancreatic cell data.
@@ -603,7 +603,8 @@ def human_acinar():
     Writes:
         figures/projection_human_acinar.svg
         Several .csv file that detail driver genes for each terminal state
-        Several .pdf files that highlight different parts of the fate determination
+        Several .pdf files that highlight different parts of the fate
+        determination
     """
 
     # Load in pseudotime and weights for this specific acinar lineage
@@ -614,7 +615,7 @@ def human_acinar():
         "pseudotime_objects/human_acinar_s10e2_lineage_weights.csv", index_col=0
     )
 
-    # Restrict the pseudotime to match the degree of differentiation to the ferret
+    # Restrict the pseudotime to match the degree of differentiation in ferret
     pseudotime_threshold = 80
     human_acinar_pseudotime[human_acinar_pseudotime > pseudotime_threshold] = np.nan
     human_acinar_weights[human_acinar_pseudotime.isna()] = 0
@@ -651,11 +652,11 @@ def human_acinar():
         add_margin=0.02,
     )
 
-    # Instantiate the GPCCA esimator and fit to the clusters using majority celltype
+    # Instantiate the GPCCA esimator and fit to the clusters using celltype
     g = cr.estimators.GPCCA(pk)
     g.fit(cluster_key="Celltype", n_states=4)
 
-    # Manually set the terminal states after the fit has taken place, calculate fate probabilities
+    # Manually set the terminal states after fit, calculate fate probabilities
     g.set_terminal_states(
         states=[
             "Acinar Immature",
@@ -688,7 +689,7 @@ def human_acinar():
         save="human_acinar_circular_projection.pdf",
     )
 
-    # Name all clusters in the dataset to be driving factors when calculating lineage drivers
+    # Name all celltypes to be driving factors when calculating lineage drivers
     driver_clusters = [
         "Acinar Immature",
         "Acinar Maturing",
@@ -698,7 +699,7 @@ def human_acinar():
         "Pancreatic Progenitor",
     ]
 
-    # Calculate lineage drivers with pancreatic progenitor_1 as the terminal state
+    # Calculate lineage drivers with pancreatic progenitor_1 as terminal state
     panc_prog_1_df = g.compute_lineage_drivers(
         lineages=["Pancreatic Progenitor_1"],
         cluster_key="Celltype",
@@ -707,7 +708,7 @@ def human_acinar():
     adata_human_acinar.obs["fate_probabilities_pancreatic_progenitor_1"] = (
         g.fate_probabilities["Pancreatic Progenitor_1"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_human_acinar,
         basis="umap",
@@ -720,7 +721,7 @@ def human_acinar():
         save="_pancreatic_progenitor_1_driver_genes_human_acinar.pdf",
     )
 
-    # Calculate lineage drivers with pancreatic progenitor_2 as the terminal state
+    # Calculate lineage drivers with pancreatic progenitor_2 as terminal state
     panc_prog_2_df = g.compute_lineage_drivers(
         lineages=["Pancreatic Progenitor_2"],
         cluster_key="Celltype",
@@ -729,7 +730,7 @@ def human_acinar():
     adata_human_acinar.obs["fate_probabilities_pancreatic_progenitor_2"] = (
         g.fate_probabilities["Pancreatic Progenitor_2"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_human_acinar,
         basis="umap",
@@ -749,7 +750,7 @@ def human_acinar():
     adata_human_acinar.obs["fate_probabilities_acinar_maturing"] = g.fate_probabilities[
         "Acinar Maturing"
     ].X.flatten()
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_human_acinar,
         basis="umap",
@@ -772,7 +773,7 @@ def human_acinar():
     adata_human_acinar.obs["fate_probabilities_acinar_immature"] = g.fate_probabilities[
         "Acinar Immature"
     ].X.flatten()
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_human_acinar,
         basis="umap",
@@ -869,7 +870,8 @@ def human_ductal():
     Writes:
         figures/projection_human_ductal.svg
         Several .csv file that detail driver genes for each terminal state
-        Several .pdf files that highlight different parts of the fate determination
+        Several .pdf files that highlight different parts of the fate
+        determination
     """
 
     # Load in pseudotime and weights for this specific ductal lineage
@@ -883,7 +885,7 @@ def human_ductal():
     # Load in the h5ad file from the ferret Seurat object
     adata_human_ductal = sc.read_h5ad("pseudotime_objects/human_ductal.h5ad")
 
-    # Restrict the pseudotime to match the degree of differentiation to the ferret
+    # Restrict the pseudotime to match the degree of differentiation in ferret
     pseudotime_threshold = 70
     human_ductal_pseudotime[human_ductal_pseudotime > pseudotime_threshold] = np.nan
     human_ductal_weights[human_ductal_weights.isna()] = 0
@@ -917,11 +919,11 @@ def human_ductal():
         add_margin=0.02,
     )
 
-    # Instantiate the GPCCA esimator and fit to the clusters using majority celltype
+    # Instantiate the GPCCA esimator and fit to the clusters using celltype
     g = cr.estimators.GPCCA(pk)
     g.fit(cluster_key="Celltype", n_states=4)
 
-    # Manually set the terminal states after the fit has taken place, calculate fate probabilities
+    # Manually set the terminal states after fit, calculate fate probabilities
     g.set_terminal_states(
         states=[
             "Pancreatic Progenitor_1",
@@ -954,7 +956,7 @@ def human_ductal():
         save="human_ductal_circular_projection.pdf",
     )
 
-    # Name all clusters in the dataset to be driving factors when calculating lineage drivers
+    # Name all celltypes to be driving factors when calculating lineage drivers
     driver_clusters = [
         "Ductal Immature",
         "Ductal Maturing",
@@ -970,7 +972,7 @@ def human_ductal():
     adata_human_ductal.obs["fate_probabilities_ductal_immature_1"] = (
         g.fate_probabilities["Ductal Immature_1"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_human_ductal,
         basis="umap",
@@ -993,7 +995,7 @@ def human_ductal():
     adata_human_ductal.obs["fate_probabilities_ductal_immature_2"] = (
         g.fate_probabilities["Ductal Immature_2"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_human_ductal,
         basis="umap",
@@ -1009,7 +1011,7 @@ def human_ductal():
         "csv_files/ductal_immature_2_driver_genes_human.csv", index=True
     )
 
-    # Calculate lineage drivers with pancreatic progenitor_1 as the terminal state
+    # Calculate lineage drivers with pancreatic progenitor_1 as terminal state
     pancreatic_prog_1_df = g.compute_lineage_drivers(
         lineages=["Pancreatic Progenitor_1"],
         cluster_key="Celltype",
@@ -1018,7 +1020,7 @@ def human_ductal():
     adata_human_ductal.obs["fate_probabilities_pancreatic_progenitor_1"] = (
         g.fate_probabilities["Pancreatic Progenitor_1"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_human_ductal,
         basis="umap",
@@ -1031,7 +1033,7 @@ def human_ductal():
         save="_pancreatic_progenitor_1_driver_genes_human_ductal.pdf",
     )
 
-    # Calculate lineage drivers with pancreatic progenitor_2 as the terminal state
+    # Calculate lineage drivers with pancreatic progenitor_2 as terminal state
     pancreatic_prog_2_df = g.compute_lineage_drivers(
         lineages=["Pancreatic Progenitor_2"],
         cluster_key="Celltype",
@@ -1040,7 +1042,7 @@ def human_ductal():
     adata_human_ductal.obs["fate_probabilities_pancreatic_progenitor_2"] = (
         g.fate_probabilities["Pancreatic Progenitor_2"].X.flatten()
     )
-    # Plot the top 8 genes associated with the pathway next to the fate probability plot
+    # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_human_ductal,
         basis="umap",
