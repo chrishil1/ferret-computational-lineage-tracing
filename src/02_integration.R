@@ -113,5 +113,5 @@ dev.off()
 # Save Seurat objecet to output file
 saveRDS(
   file = file.path(data_dir, "02_merged_integrated_object.rds"),
-  merged_seurat
+  knn_merged_object
 )

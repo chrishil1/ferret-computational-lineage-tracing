@@ -1,42 +1,3 @@
-# Define color palette for use with umap/barplots
-human_palette <- c(
-  "Acinar Immature" = "#e64463",
-  "Acinar Maturing" = "#62be4a",
-  "Acinar Progenitor" = "#9255cb",
-  "Acinar Proliferating" = "#b2b336",
-  "Acinar Secretory" = "#5069d7",
-  "Alpha" = "#dc8f2f",
-  "B lymphocyte" = "#d579e1",
-  "Beta" = "#4c8a35",
-  "Delta" = "#ca42a9",
-  "Dendritic Cell" = "#54c081",
-  "Ductal ECM" = "#d83f86",
-  "Ductal Immature" = "#52bfad",
-  "Ductal Maturing" = "#cc4724",
-  "Ductal Proliferating" = "#4ab4dd",
-  "Ducto-Acinar" = "#dc6c4d",
-  "Endothelial" = "#5982c5",
-  "Endothelial Lymphatic" = "#cca15d",
-  "Erythroblast" = "#9384d9",
-  "Mesenchyme Proliferating" = "#727229",
-  "Mesenchyme Subtype 1" = "#ae57a1",
-  "Mesenchyme Subtype 2" = "#9cb26a",
-  "Mesenchyme Subtype 3" = "#755298",
-  "Mesenchyme Subtype 4" = "#37835d",
-  "Mono-Macrophage" = "#b83849",
-  "Neuron" = "#ca96d2",
-  "Pancreatic Progenitor" = "#9a5e2c",
-  "Phagocytic Macrophage" = "#e47da1",
-  "Schwann" = "#e5907a",
-  "Stromal" = "#9f4970",
-  "T lymphocyte" = "#aa5659"
-)
-
-blue_yellow <- c(
-  "#352A86", "#343DAE", "#0262E0", "#1389D2",
-  "#2DB7A3", "#A5BE6A", "#F8BA43", "#F6DA23", "#F8FA0D"
-)
-
 #' Create a Stacked Percentage Bar Plot
 #'
 #' Generates a stacked bar plot showing the percentage breakdown of a grouping
@@ -135,12 +96,15 @@ get_de_heatmap <- function(seurat_object,
     )
   }
 
+  # Set the Idents so the markers are calculated properly
+  Idents(seurat_object) <- group_by
+
   # Set cluster identities for the Seurat object
-  markers_file <- paste0("all_markers_", group_by, ".csv")
+  markers_file <- file.path(csv_dir, paste0("all_markers_", group_by, ".csv"))
   if (file.exists(markers_file)) {
     all_markers <- read.csv(markers_file)
   } else {
-    all_markers <- FindAllMarkers(seurat_object)
+    all_markers <- FindAllMarkers(seurat_object, group.by = group_by)
     write.csv(all_markers, file = markers_file, row.names = FALSE)
   }
 

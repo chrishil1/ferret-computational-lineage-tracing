@@ -301,17 +301,14 @@ calculate_human_knn_mapping <- function(merged_seurat,
     new_labels[i] <- names(sort(table(neighbor_types), decreasing = TRUE))[1]
   }
 
-  # Relabel ferret cells based on the kNN results
-  merged_seurat@meta.data[ferret_pulled_cells, "final_combined_celltype"] <-
+  # Initialise knn_celltype for all cells, then populate ferret cells with
+  # their kNN-derived labels (with the _human suffix stripped)
+  merged_seurat@meta.data$knn_celltype <- NA_character_
+  merged_seurat@meta.data[ferret_pulled_cells, "knn_celltype"] <- gsub(
+    "_human$",
+    "",
     new_labels
-
-  # Remove the human suffix from the combined names so they are equivalent
-  merged_seurat@meta.data[ferret_pulled_cells, "final_combined_celltype"] <-
-    gsub(
-      "_human$",
-      "",
-      merged_seurat@meta.data[ferret_pulled_cells, "final_combined_celltype"]
-    )
+  )
 
   return(merged_seurat)
 }

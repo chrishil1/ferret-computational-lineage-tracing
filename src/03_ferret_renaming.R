@@ -5,19 +5,25 @@ library(pheatmap)
 library(Seurat)
 library(scAnalysisR)
 
-source(here("03_ferret_renaming_helpers.R"))
+source(here("src/common_setup.R"))
+source(here("src/03_ferret_renaming_helpers.R"))
 
-# Useful directories
-data_dir <- here("rds_objects")
-image_dir <- here("output_images")
+# Load in the Seurat object after integrat
+merged_object <- readRDS(file.path(data_dir, "02_merged_integrated_object.rds"))
 
-# Load in knn relabeled ferret object
-ferret_knn_object <- readRDS(file.path(
-  data_dir,
-  "03_ferret_relabelled_clusters.rds"
-))
-ferret_knn_object$knn_celltype <- ferret_knn_object$final_combined_celltype
+# Subset to just include the ferret cells
+ferret_knn_object <- subset(merged_object, subset = batch == "Ferret")
 
+# Process the object to get in an easier to visualize projection
+ferret_knn_object <- NormalizeData(ferret_knn_object) %>%
+  FindVariableFeatures() %>%
+  ScaleData() %>%
+  RunPCA(npcs = 15) %>%
+  FindNeighbors(dims = 1:15) %>%
+  FindClusters(resolution = 0.8) %>%
+  RunUMAP(reduction = "pca", dims = 1:15)
+
+# Visualize the knn cell labels from the human dataset integration
 ferret_knn_umap <- plotDimRed(ferret_knn_object,
   col_by = "knn_celltype",
   color = human_palette,
@@ -26,30 +32,46 @@ ferret_knn_umap <- plotDimRed(ferret_knn_object,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "ferret_knn_umap.pdf"),
+  file = file.path(image_dir, "03_ferret_knn_umap.pdf"),
   width = 9,
   height = 6
 )
 print(ferret_knn_umap)
 dev.off()
 
-# TODO: Find the code that does the majority cell type labeling and put it here
+# Calculate the resolution 7 clustering
+ferret_res_7_object <- NormalizeData(ferret_knn_object) %>%
+  FindClusters(resolution = 7) %>%
+  RunUMAP(reduction = "pca", dims = 1:15)
 
-# Load in resolution 7 seurat cluster ferret object
-ferret_majority_object <- readRDS(file.path(
-  data_dir,
-  "03_combined_ferret_res_7.rds"
-))
+# For each res 7 cluster, find the majority knn_celltype and use it to rename
+cluster_labels <- ferret_res_7_object@meta.data %>%
+  group_by(seurat_clusters) %>%
+  summarise(
+    majority_celltype = names(sort(table(knn_celltype), decreasing = TRUE))[1],
+    .groups = "drop"
+  )
+
+# Create a mapping that will be easily applied to the Seurat object
+cluster_map <- setNames(
+  cluster_labels$majority_celltype,
+  cluster_labels$seurat_clusters
+)
+
+# Assign the new majority celltype names to the object with the mapping
+ferret_res_7_object@meta.data$majority_celltype <- cluster_map[
+  as.character(ferret_res_7_object$seurat_clusters)
+]
 
 # Visualize the resolution 7 seurat clusters used for majority renaming
-ferret_sc_majority <- plotDimRed(ferret_majority_object,
+ferret_sc_majority <- plotDimRed(ferret_res_7_object,
   col_by = "seurat_clusters",
   plot_type = "umap",
   ggrastr = TRUE
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "ferret_seurat_clusters_majority.pdf"),
+  file = file.path(image_dir, "03_ferret_seurat_clusters_majority.pdf"),
   width = 8,
   height = 6
 )
@@ -57,7 +79,7 @@ print(ferret_sc_majority)
 dev.off()
 
 # Visualize the majority cell type renaming before manual steps
-ferret_majority_umap <- plotDimRed(ferret_majority_object,
+ferret_majority_umap <- plotDimRed(ferret_res_7_object,
   col_by = "majority_celltype",
   color = human_palette,
   plot_type = "umap",
@@ -65,18 +87,17 @@ ferret_majority_umap <- plotDimRed(ferret_majority_object,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "ferret_majority_umap.pdf"),
+  file = file.path(image_dir, "03_ferret_majority_umap.pdf"),
   width = 8,
   height = 6
 )
 print(ferret_majority_umap)
 dev.off()
 
-# TODO: Find the code that does the reclustering with correct resolution
-
-# Load in ferret object after majority cell type renaming
-ferret_final_majority <-
-  readRDS(file.path(data_dir, "03_ferret_relabelled_clusters_pre.rds"))
+# Retrieve the 0.8 resolution plot to perform final renaming
+ferret_final_majority <- NormalizeData(ferret_res_7_object) %>%
+  FindClusters(resolution = 0.8) %>%
+  RunUMAP(reduction = "pca", dims = 1:15)
 
 # Visualize the Seurat clusters that gave rise to this manual renaming
 ferret_seurat_clusters <- plotDimRed(ferret_final_majority,
@@ -85,7 +106,7 @@ ferret_seurat_clusters <- plotDimRed(ferret_final_majority,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "ferret_seurat_clusters.pdf"),
+  file = file.path(image_dir, "03_ferret_seurat_clusters.pdf"),
   width = 7,
   height = 6
 )
@@ -116,7 +137,7 @@ ferret_final_majority_umap <- plotDimRed(ferret_final_majority,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "ferret_final_majority_umap.pdf"),
+  file = file.path(image_dir, "03_ferret_final_majority_umap.pdf"),
   width = 8,
   height = 6
 )
@@ -126,13 +147,13 @@ dev.off()
 # Visualize barplot of the ferret majority cell types across the 4 timepoints
 ferret_majority_barplot <- create_barplot(
   "majority_celltype",
-  ferret_majority_object,
+  ferret_final_majority,
   "day",
   human_palette
 )
 
 pdf(
-  file = file.path(image_dir, "ferret_majority_barplot.pdf"),
+  file = file.path(image_dir, "03_ferret_majority_barplot.pdf"),
   width = 6,
   height = 6
 )
@@ -150,16 +171,19 @@ ferret_majority_heatmap <-
     custom_order = c(
       "T lymphocyte", "Delta", "Beta", "Alpha", "B lymphocyte",
       "Ductal Immature", "Mesenchyme Subtype 1", "Ductal Proliferating",
-      "Acinar Proliferating", "Mesenchyme Subtype 2", "Endothelial Lymphatic",
+      "Acinar Proliferating", "Endothelial Lymphatic", # "Mesenchyme Subtype 2",
       "Acinar Immature", "Acinar Maturing", "Acinar Progenitor",
       "Pancreatic Progenitor"
     )
   )
 
 pdf(
-  file = file.path(image_dir, "ferret_majority_heatmap.pdf"),
+  file = file.path(image_dir, "03_ferret_majority_heatmap.pdf"),
   width = 15,
   height = 8
 )
 print(ferret_majority_heatmap)
 dev.off()
+
+# Save the updated object to an output Seurat file
+saveRDS(file = file.path(data_dir, "03_combined_ferret_res_7.rds"), ferret_final_majority)
