@@ -92,7 +92,7 @@ dev.off()
 # Human dataset plots #
 #######################
 # Load in Seurat object
-human_object <- readRDS(here(data_dir, "01_human-fetal-panc-allcells.rds"))
+human_object <- readRDS(here(data_dir, "human-fetal-panc-allcells.rds"))
 human_object$Celltype <- factor(human_object$Celltype,
   levels = sort(levels(human_object$Celltype))
 )

@@ -7,17 +7,14 @@ library(scCustomize)
 library(Seurat)
 library(stringr)
 
-source(here("02_integration_helpers.R"))
-
-# Important directories
-data_dir <- here("rds_objects")
-image_dir <- here("output_images")
-
-# Read in ortholog mapping file
-mapping_file <- read.csv(here("species_mapping_file.csv"))
+source(here("src/common_setup.R"))
+source(here("src/02_integration_helpers.R"))
 
 # Load in Seurat objects
-ferret_object <- readRDS(file.path(data_dir, "02_ferret_processed_object.rds"))
+ferret_object <- readRDS(file.path(
+  data_dir,
+  "01_ferret_processed_object.rds"
+))
 human_object <- readRDS(here(data_dir, "human-fetal-panc-allcells.rds"))
 human_object$Celltype <- droplevels(human_object$Celltype)
 
@@ -42,7 +39,7 @@ human_ferret_batch_umap <- plotDimRed(merged_seurat,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "human_ferret_batch_umap.pdf"),
+  file = file.path(image_dir, "02_human_ferret_batch_umap.pdf"),
   width = 14,
   height = 12
 )
@@ -70,7 +67,7 @@ human_ferret_celltype_umap <- plotDimRed(knn_merged_object,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "human_ferret_celltype_umap.pdf"),
+  file = file.path(image_dir, "02_human_ferret_celltype_umap.pdf"),
   width = 17,
   height = 12
 )
@@ -87,7 +84,7 @@ ferret_integrated_umap <- plotDimRed(merged_ferret,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "ferret_integrated_umap.pdf"),
+  file = file.path(image_dir, "02_ferret_integrated_umap.pdf"),
   width = 17,
   height = 12
 )
@@ -106,9 +103,15 @@ human_integrated_umap <- plotDimRed(merged_human,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "human_integrated_umap.pdf"),
+  file = file.path(image_dir, "02_human_integrated_umap.pdf"),
   width = 17,
   height = 12
 )
 print(human_integrated_umap)
 dev.off()
+
+# Save Seurat objecet to output file
+saveRDS(
+  file = file.path(data_dir, "02_merged_integrated_object.rds"),
+  merged_seurat
+)

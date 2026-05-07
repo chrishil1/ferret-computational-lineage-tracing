@@ -53,8 +53,31 @@ blue_yellow <- c(
   "#2DB7A3", "#A5BE6A", "#F8BA43", "#F6DA23", "#F8FA0D"
 )
 
+# Define the ferret cell names, used in the integration
+ferret_cells <- c(
+  "Ductal", "Beta", "Fev EP", "Alpha",
+  "Delta", "Acinar"
+)
+
+# Define the human cell names, used in the integration
+human_cells <- c(
+  "Acinar Immature_human", "Acinar Maturing_human", "Acinar Progenitor_human",
+  "Acinar Proliferating_human", "Acinar Secretory_human", "Alpha_human",
+  "B lymphocyte_human", "Beta_human", "Delta_human", "Dendritic Cell_human",
+  "Ductal ECM_human", "Ductal Immature_human", "Ductal Maturing_human",
+  "Ductal Proliferating_human", "Ducto-Acinar_human",
+  "Endothelial Lymphatic_human", "Endothelial_human", "Erythroblast_human",
+  "Mesenchyme Proliferating_human", "Mesenchyme Subtype 1_human",
+  "Mesenchyme Subtype 2_human", "Mesenchyme Subtype 3_human",
+  "Mesenchyme Subtype 4_human", "Mono-Macrophage_human", "Neuron_human",
+  "Pancreatic Progenitor_human", "Phagocytic Macrophage_human", "Schwann_human",
+  "Stromal_human", "T lymphocyte_human"
+)
+
 # Point to useful directories
 data_dir <- here("rds_objects")
 image_dir <- here("figures")
 csv_dir <- here("csv_files")
-mapping_file <- file.path(csv_dir, "species_mapping.csv")
+
+# Useful files
+mapping_file <- read.csv(file.path(csv_dir, "species_mapping_file.csv"))
