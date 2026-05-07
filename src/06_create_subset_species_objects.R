@@ -160,10 +160,15 @@ final_human <- subset(new_human_object, features = combined_genes)
 saveRDS(final_human, file.path(data_dir, "final_human.rds"))
 
 # Determine the background genes by just taking all genes present in both
-background_genes <- rownames(final_human)
+background_genes <- data.frame(
+  Genes = rownames(final_human)
+)
 
 # Write the background genes to an output file
-writeLines(
+write.table(
   background_genes,
-  con = here("csv_files/background_genes.csv")
+  file = here("csv_files/background_genes.csv"),
+  quote = FALSE,
+  row.names = FALSE,
+  sep = ","
 )
