@@ -2,7 +2,7 @@ library(biomaRt)
 library(dplyr)
 library(here)
 library(Seurat)
-options(Seurat.object.assay.version = 'v3')
+options(Seurat.object.assay.version = "v3")
 
 # Useful directories
 save_dir <- here("plots")
@@ -33,9 +33,9 @@ ferret_object[["RNA"]]$counts.1 <- NULL
 
 # Replace ferret gene names with human orthologs, if available
 new_gene_names <- ifelse(rownames(ferret_object) %in% names(mapping_list) &
-    mapping_list[rownames(ferret_object)] != "",
-    mapping_list[rownames(ferret_object)],
-    rownames(ferret_object)
+  mapping_list[rownames(ferret_object)] != "",
+  mapping_list[rownames(ferret_object)],
+  rownames(ferret_object)
 )
 
 # Remove the names from the new gene mapping
