@@ -1,26 +1,21 @@
 library(dplyr)
 library(ggplot2)
+library(grid)
 library(here)
 library(pheatmap)
 library(scAnalysisR)
 library(Seurat)
-library(grid)
 
-source(here("01_dataset_visualization_helpers.R"))
-
-# Point to data directory
-data_dir <- here("rds_objects")
-image_dir <- here("output_images")
-mapping_file <- here("species_mapping_file.csv")
+source(here("src/common_setup.R"))
+source(here("src/01_dataset_visualization_helpers.R"))
 
 ########################
 # Ferret dataset plots #
 ########################
-
-# Load in seurat object
+# Load in Seurat object
 ferret_object <- readRDS(file.path(
   data_dir,
-  "initial_reclustered_ferret_object.rds"
+  "01_initial_reclustered_ferret_object.rds"
 ))
 ferret_object$day <- gsub("_b2$", "", ferret_object$sample)
 
@@ -32,7 +27,11 @@ ferret_day_umap <- plotDimRed(ferret_object,
   ggrastr = TRUE
 )[[1]]
 
-pdf(file = file.path(image_dir, "ferret_day_umap.pdf"), width = 7, height = 6)
+pdf(
+  file = file.path(image_dir, "01_ferret_day_umap.pdf"),
+  width = 7,
+  height = 6
+)
 print(ferret_day_umap)
 dev.off()
 
@@ -45,7 +44,7 @@ ferret_celltype_umap <- plotDimRed(ferret_object,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "ferret_celltype_umap.pdf"),
+  file = file.path(image_dir, "01_ferret_celltype_umap.pdf"),
   width = 7.5,
   height = 6
 )
@@ -66,7 +65,7 @@ ferret_day_de_heatmap <- get_de_heatmap(
 )
 
 pdf(
-  file = file.path(image_dir, "ferret_day_de_heatmap.pdf"),
+  file = file.path(image_dir, "01_ferret_day_de_heatmap.pdf"),
   width = 10,
   height = 8
 )
@@ -82,7 +81,7 @@ ferret_day_barplot <- create_barplot(
 )
 
 pdf(
-  file = file.path(image_dir, "ferret_day_barplot.pdf"),
+  file = file.path(image_dir, "01_ferret_day_barplot.pdf"),
   width = 6,
   height = 6
 )
@@ -92,9 +91,8 @@ dev.off()
 #######################
 # Human dataset plots #
 #######################
-
-# Load in seurat object
-human_object <- readRDS(here(data_dir, "human-fetal-panc-allcells.rds"))
+# Load in Seurat object
+human_object <- readRDS(here(data_dir, "01_human-fetal-panc-allcells.rds"))
 human_object$Celltype <- factor(human_object$Celltype,
   levels = sort(levels(human_object$Celltype))
 )
@@ -110,7 +108,11 @@ human_pcw_umap <- plotDimRed(human_object,
   ggrastr = TRUE
 )[[1]]
 
-pdf(file = file.path(image_dir, "human_pcw_umap.pdf"), width = 15, height = 12)
+pdf(
+  file = file.path(image_dir, "01_human_pcw_umap.pdf"),
+  width = 15,
+  height = 12
+)
 print(human_pcw_umap)
 dev.off()
 
@@ -123,7 +125,7 @@ human_celltype_umap <- plotDimRed(human_object,
 )[[1]]
 
 pdf(
-  file = file.path(image_dir, "human_celltype_umap.pdf"),
+  file = file.path(image_dir, "01_human_celltype_umap.pdf"),
   width = 17,
   height = 12
 )
@@ -150,7 +152,7 @@ human_celltype_de_heatmap <- get_de_heatmap(
 )
 
 pdf(
-  file = file.path(image_dir, "human_celltype_de_heatmap.pdf"),
+  file = file.path(image_dir, "01_human_celltype_de_heatmap.pdf"),
   width = 15,
   height = 10
 )
@@ -165,6 +167,10 @@ human_pcw_barplot <- create_barplot(
   human_palette
 )
 
-pdf(file = file.path(image_dir, "human_pcw_barplot.pdf"), width = 6, height = 6)
+pdf(
+  file = file.path(image_dir, "01_human_pcw_barplot.pdf"),
+  width = 6,
+  height = 6
+)
 print(human_pcw_barplot)
 dev.off()
