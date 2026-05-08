@@ -1,9 +1,3 @@
-# Color palette to use in heatmap
-blue_yellow <- c(
-  "#352A86", "#343DAE", "#0262E0", "#1389D2",
-  "#2DB7A3", "#A5BE6A", "#F8BA43", "#F6DA23", "#F8FA0D"
-)
-
 #' Generate a Validation Heatmap of Gene Expression Across Cell Types
 #'
 #' Computes average gene expression per cell type from a Seurat object and

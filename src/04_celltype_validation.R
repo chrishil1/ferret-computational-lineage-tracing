@@ -1,15 +1,13 @@
 library(dplyr)
 library(here)
+library(JASPAR2020)
 library(pheatmap)
 library(Seurat)
+library(TFBSTools)
 
-source(here("04_celltype_validation_helpers.R"))
-
+source(here("src/common_setup.R"))
+source(here("src/04_celltype_validation_helpers.R"))
 ggplot2::theme_set(ggplot2::theme_classic(base_size = 10))
-
-# Useful directories
-data_dir <- here("rds_objects")
-image_dir <- here("output_images")
 
 # Define the cell types that are found in both datasets
 shared_celltypes <- c(
@@ -18,26 +16,16 @@ shared_celltypes <- c(
   "Ductal Immature", "Ductal Proliferating"
 )
 
-# Load in the marker genes in the two datasets per celltype label
-# TODO: Add in logic so this is calculated here
-ferret_genes <- read.csv("FindAllMarkers_ferret_majority_celltype.csv")
-human_genes <- read.csv("FindAllMarkers_human_celltype.csv")
-
 # Load in Seurat objects for the two species
-# TODO: Find out how these objects were prepped
 ferret_object <- readRDS(file.path(data_dir, "04_final_ferret_w_genes.rds"))
 human_object <- readRDS(file.path(data_dir, "04_final_human_w_genes.rds"))
 human_subset <- subset(human_object, subset = Celltype %in% shared_celltypes)
 
-# Normalize the two datasets
-ferret_object <- NormalizeData(ferret_object)
-human_object <- NormalizeData(human_object)
+ferret_genes <- FindAllMarkers(ferret_object, group.by = "majority_celltype")
+human_genes <- FindAllMarkers(human_object, group.by = "Celltype")
 
 # Function to convert cell types into suffixes for variable naming ease
 make_varname <- function(celltype) gsub(" ", "_", tolower(celltype))
-
-# TODO: Mismatch in this method of gene extraction and the ones I extracted in
-# the past
 
 # Loop over all cell types
 for (celltype in shared_celltypes) {
@@ -77,14 +65,12 @@ for (celltype in shared_celltypes) {
   assign(paste0("intersected_genes_", suffix), top100)
 }
 
-# Define all the variables and assign them ot a single list
 combined_gene_list <- lapply(shared_celltypes, function(celltype) {
   get(paste0("intersected_genes_", make_varname(celltype)))
 })
 names(combined_gene_list) <- make_varname(shared_celltypes)
 
-# Flatten the array for use downstream
-combined_genes_unique <- unique(unlist(combined_gene_list))
+combined_genes_unique <- unname(unlist(combined_gene_list))
 
 # Calculate the initial ferret heatmap including all genes extracted
 initial_ferret_heatmap <- get_validation_heatmap(
@@ -106,7 +92,7 @@ initial_human_heatmap <- get_validation_heatmap(
   show_rownames = FALSE
 )
 
-# Get expression data from both datasets
+# Get expression data from the first heatmap expression
 expr_ferret <- initial_ferret_heatmap$expression_data
 expr_human <- initial_human_heatmap$expression_data
 
@@ -127,7 +113,7 @@ for (cluster in shared_celltypes) {
   }
 }
 
-# EXtract all of these genes per cluster into a final list
+# Extract all of these genes per cluster into a final list
 for (cluster in shared_celltypes) {
   if (cluster %in% names(genes_per_cluster)) {
     all_genes_ordered <- c(all_genes_ordered, genes_per_cluster[[cluster]])
@@ -143,7 +129,7 @@ final_ferret_heatmap <- get_validation_heatmap(
   cluster_rows = FALSE,
   show_rownames = FALSE
 )
-pdf(file.path(image_dir, "final_ferret_heatmap.pdf"), height = 8, width = 3)
+pdf(file.path(image_dir, "04_final_ferret_heatmap.pdf"), height = 8, width = 3)
 print(final_ferret_heatmap$heatmap)
 dev.off()
 
@@ -156,19 +142,20 @@ final_human_heatmap <- get_validation_heatmap(
   cluster_rows = FALSE,
   show_rownames = FALSE
 )
-pdf(file.path(image_dir, "final_human_heatmap.pdf"), height = 8, width = 3)
+pdf(file.path(image_dir, "04_final_human_heatmap.pdf"), height = 8, width = 3)
 print(final_human_heatmap$heatmap)
 dev.off()
 
-# Save these genes and their expresion data to output csv files
+
+# Save these genes and their expression data to output csv files
 write.csv(
   final_ferret_heatmap$expression_data,
-  file = "heatmap_ferret_expression_data.csv",
+  file = file.path(csv_dir, "heatmap_ferret_expression_data.csv"),
   row.names = TRUE
 )
 
 write.csv(
   final_human_heatmap$expression_data,
-  file = "heatmap_human_expression_data.csv",
+  file = file.path(csv_dir, "heatmap_human_expression_data.csv"),
   row.names = TRUE
 )
