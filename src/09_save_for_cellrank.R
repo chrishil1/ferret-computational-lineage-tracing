@@ -6,13 +6,9 @@ library(SeuratDisk)
 library(slingshot)
 options(Seurat.object.assay.version = "v3")
 
-# Useful directories
-save_dir <- here("plots")
-data_dir <- here("rds_objects")
-
 # Read in our final species objects
-final_ferret <- readRDS(file.path(data_dir, "final_ferret.rds"))
-final_human <- readRDS(file.path(data_dir, "final_human.rds"))
+final_ferret <- readRDS(file.path(data_dir, "05_final_ferret.rds"))
+final_human <- readRDS(file.path(data_dir, "05_final_human.rds"))
 
 #######################
 # Human object saving #
@@ -47,15 +43,17 @@ ductal_human_lineage_weights <- slingCurveWeights(slingshot_sce)
 
 # Write pseudotime and lineage weights to output files
 write.csv(ductal_human_pseudotime,
-  file = "to_python/human_ductal_s10e19_pseudotime.csv"
+  file = "pseudotime_objects/human_ductal_s10e19_pseudotime.csv"
 )
 write.csv(ductal_human_lineage_weights,
-  file = "to_python/human_ductal_s10e19_lineage_weights.csv"
+  file = "pseudotime_objects/human_ductal_s10e19_lineage_weights.csv"
 )
 
 # Save the ductal subset for the human dataset to a python compatible file
-SaveH5Seurat(ductal_subset, filename = "to_python/human_ductal.h5Seurat")
-Convert("to_python/human_ductal.h5Seurat", dest = "h5ad")
+SaveH5Seurat(ductal_subset,
+  filename = "pseudotime_objects/human_ductal.h5Seurat"
+)
+Convert("pseudotime_objects/human_ductal.h5Seurat", dest = "h5ad")
 
 # Subset to acinar clusters only
 acinar_clusters <- c(2, 3, 4, 6, 10, 11)
@@ -87,15 +85,17 @@ acinar_human_lineage_weights <- slingCurveWeights(slingshot_sce)
 
 # Write pseudotime and lineage weights to output files
 write.csv(acinar_human_pseudotime,
-  file = "to_python/human_acinar_s10e2_pseudotime.csv"
+  file = "pseudotime_objects/human_acinar_s10e2_pseudotime.csv"
 )
 write.csv(acinar_human_lineage_weights,
-  file = "to_python/human_acinar_s10e2_lineage_weights.csv"
+  file = "pseudotime_objects/human_acinar_s10e2_lineage_weights.csv"
 )
 
 # Save the acinar subset for the human dataset to a python compatible file
-SaveH5Seurat(acinar_subset, filename = "to_python/human_acinar.h5Seurat")
-Convert("to_python/human_acinar.h5Seurat", dest = "h5ad")
+SaveH5Seurat(acinar_subset,
+  filename = "pseudotime_objects/human_acinar.h5Seurat"
+)
+Convert("pseudotime_objects/human_acinar.h5Seurat", dest = "h5ad")
 
 ########################
 # Ferret object saving #
@@ -127,10 +127,10 @@ ductal_ferret_lineage_weights <- slingCurveWeights(slingshot_sce)
 
 # Write pseudotime and lineage weights to output files
 write.csv(ductal_ferret_pseudotime,
-  file = "to_python/ferret_ductal_s9e0_pseudotime.csv"
+  file = "pseudotime_objects/ferret_ductal_s9e0_pseudotime.csv"
 )
 write.csv(ductal_ferret_lineage_weights,
-  file = "to_python/ferret_ductal_s9e0_lineage_weights.csv"
+  file = "pseudotime_objects/ferret_ductal_s9e0_lineage_weights.csv"
 )
 
 # Convert the ferret object into RNA3 based naming scheme for CellRank
@@ -142,8 +142,10 @@ ductal_subset[["RNA"]]$data <- NULL
 ductal_subset[["RNA"]]$scale.data <- NULL
 
 # Save the ductal subset for the ferret dataset to a python compatible file
-SaveH5Seurat(ductal_subset, filename = "to_python/ferret_ductal.h5Seurat")
-Convert("to_python/ferret_ductal.h5Seurat", dest = "h5ad")
+SaveH5Seurat(ductal_subset,
+  filename = "pseudotime_objects/ferret_ductal.h5Seurat"
+)
+Convert("pseudotime_objects/ferret_ductal.h5Seurat", dest = "h5ad")
 
 # Subset to acinar clusters only
 acinar_clusters <- c(9, 4, 14, 1, 16, 8, 11, 10)
@@ -172,10 +174,10 @@ acinar_ferret_lineage_weights <- slingCurveWeights(slingshot_sce)
 
 # Write pseudotime and lineage weights to output files
 write.csv(acinar_ferret_pseudotime,
-  file = "to_python/ferret_acinar_s9e10_pseudotime.csv"
+  file = "pseudotime_objects/ferret_acinar_s9e10_pseudotime.csv"
 )
 write.csv(acinar_ferret_lineage_weights,
-  file = "to_python/ferret_acinar_s9e10_lineage_weights.csv"
+  file = "pseudotime_objects/ferret_acinar_s9e10_lineage_weights.csv"
 )
 
 # Convert the ferret object into RNA3 based naming scheme for CellRank
@@ -188,5 +190,7 @@ acinar_subset[["RNA"]]$data <- NULL
 acinar_subset[["RNA"]]$scale.data <- NULL
 
 # Save the acinar subset for the ferret dataset to a python compatible file
-SaveH5Seurat(acinar_subset, filename = "to_python/ferret_acinar.h5Seurat")
-Convert("to_python/ferret_acinar.h5Seurat", dest = "h5ad")
+SaveH5Seurat(acinar_subset,
+  filename = "pseudotime_objects/ferret_acinar.h5Seurat"
+)
+Convert("pseudotime_objects/ferret_acinar.h5Seurat", dest = "h5ad")

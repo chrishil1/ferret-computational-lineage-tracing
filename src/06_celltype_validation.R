@@ -17,8 +17,8 @@ shared_celltypes <- c(
 )
 
 # Load in Seurat objects for the two species
-ferret_object <- readRDS(file.path(data_dir, "04_final_ferret_w_genes.rds"))
-human_object <- readRDS(file.path(data_dir, "04_final_human_w_genes.rds"))
+ferret_object <- readRDS(file.path(data_dir, "05_final_ferret.rds"))
+human_object <- readRDS(file.path(data_dir, "05_final_human.rds"))
 human_subset <- subset(human_object, subset = Celltype %in% shared_celltypes)
 
 ferret_genes <- FindAllMarkers(ferret_object, group.by = "majority_celltype")

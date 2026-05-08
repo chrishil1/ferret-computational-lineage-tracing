@@ -1,5 +1,3 @@
-library(here)
-
 # Define color palettes
 ferret_palette <- c(
   "#0083bc", "#00bef1", "#019538", "#ff98c0", "#efa700",
@@ -53,6 +51,15 @@ blue_yellow <- c(
   "#2DB7A3", "#A5BE6A", "#F8BA43", "#F6DA23", "#F8FA0D"
 )
 
+custom_palette <- c(
+  "#f89a09", "#c5abff", "#0261b4", "#ff3b5c", "#008372",
+  "#56551a", "#d64f01", "#ff7de0", "#cea7d9", "#3adae0",
+  "#f24537", "#e26cf2", "#ff9164", "#7cdc6a", "#109a0c",
+  "#eac07d", "#028fb0", "#8a2b7a", "#95300f", "#a40065",
+  "#ffb259", "#7a3f5f", "#8cd798", "#487400", "#018c41",
+  "#96284d", "#674383", "#987100", "#804215", "#ff6fa5"
+)
+
 # Define the ferret cell names, used in the integration
 ferret_cells <- c(
   "Ductal", "Beta", "Fev EP", "Alpha",
@@ -78,6 +85,7 @@ human_cells <- c(
 data_dir <- here("rds_objects")
 image_dir <- here("figures")
 csv_dir <- here("csv_files")
+fitgam_dir <- here("fitgam_objects")
 
 # Useful files
 mapping_file <- read.csv(file.path(csv_dir, "species_mapping_file.csv"))

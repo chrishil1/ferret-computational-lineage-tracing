@@ -1,13 +1,3 @@
-# Palettes to use in the various plots
-custom_palette <- c(
-  "#f89a09", "#c5abff", "#0261b4", "#ff3b5c", "#008372",
-  "#56551a", "#d64f01", "#ff7de0", "#cea7d9", "#3adae0",
-  "#f24537", "#e26cf2", "#ff9164", "#7cdc6a", "#109a0c",
-  "#eac07d", "#028fb0", "#8a2b7a", "#95300f", "#a40065",
-  "#ffb259", "#7a3f5f", "#8cd798", "#487400", "#018c41",
-  "#96284d", "#674383", "#987100", "#804215", "#ff6fa5"
-)
-
 #' Get Query Gene Names for a Specified Cluster
 #'
 #' Retrieves the significant differentially expressed genes for a given cluster

@@ -22,17 +22,12 @@ library(slingshot)
 library(TFBSTools)
 library(tradeSeq)
 
-source(here("07_human_lineages_helper.R"))
+source(here("src/08_human_lineages_helper.R"))
 options(Seurat.object.assay.version = "v3")
 ggplot2::theme_set(ggplot2::theme_classic(base_size = 10))
 
-# Useful directories
-save_dir <- here("plots")
-data_dir <- here("rds_objects")
-fitgam_dir <- here("fitgam_objects")
-
 # Load in our Seurat object
-seurat_object <- readRDS(file.path(data_dir, "07_human_remade_seurat.rds"))
+seurat_object <- readRDS(file.path(data_dir, "04_human_remade_seurat.rds"))
 Idents(seurat_object) <- "Leiden_cluster"
 ```
 
@@ -99,7 +94,7 @@ plots <- make_lineage_heatmaps(
   lineage_asso_res = lineage_assocRes,
   waldcutoff = 200,
   pval_cutoff = 0.05,
-  save_dir = save_dir,
+  save_dir = image_dir,
   fraction = 70,
   day = FALSE
 )
@@ -172,7 +167,7 @@ plots <- make_lineage_heatmaps(
   lineage_asso_res = lineage_assocRes,
   waldcutoff = 200,
   pval_cutoff = 0.05,
-  save_dir = save_dir,
+  save_dir = image_dir,
   fraction = 80,
   day = FALSE
 )

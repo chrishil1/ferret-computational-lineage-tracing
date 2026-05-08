@@ -2,14 +2,9 @@ library(biomaRt)
 library(dplyr)
 library(here)
 library(Seurat)
+
+source(here("src/common_setup.R"))
 options(Seurat.object.assay.version = "v3")
-
-# Useful directories
-save_dir <- here("plots")
-data_dir <- here("rds_objects")
-
-# Load in our ortholog file
-mapping_file <- read.csv(here("csv_files/species_mapping_file.csv"))
 
 # Establish mapping dictionary from ortholog file
 mapping_gene_col <- "gene_id"
@@ -21,7 +16,7 @@ mapping_list <- setNames(
 
 # Load in our Seurat objects
 ferret_object <- readRDS(file.path(data_dir, "03_combined_ferret_res_7.rds"))
-human_object <- readRDS(file.path(data_dir, "07_human_remade_seurat.rds"))
+human_object <- readRDS(file.path(data_dir, "04_human_remade_seurat.rds"))
 Idents(human_object) <- "Leiden_cluster"
 
 # Clean up Seurat object after reclustering took place
@@ -153,11 +148,11 @@ final_ferret <- RenameAssays(object = final_ferret, RNA3 = "RNA")
 final_ferret[["RNA"]]$data <- NULL
 final_ferret[["RNA"]]$scale.data <- NULL
 
-saveRDS(final_ferret, file.path(data_dir, "final_ferret.rds"))
+saveRDS(final_ferret, file.path(data_dir, "05_final_ferret.rds"))
 
 # Get the final human object to be used in downstream analyses
 final_human <- subset(new_human_object, features = combined_genes)
-saveRDS(final_human, file.path(data_dir, "final_human.rds"))
+saveRDS(final_human, file.path(data_dir, "05_final_human.rds"))
 
 # Determine the background genes by just taking all genes present in both
 background_genes <- data.frame(

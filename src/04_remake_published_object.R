@@ -67,4 +67,4 @@ subset_seurat <- RunUMAP(subset_seurat,
 )
 
 # Save to output RDS file
-saveRDS(subset_seurat, here("recreated_published_object.rds"))
+saveRDS(subset_seurat, here("04_human_remade_seurat.rds"))

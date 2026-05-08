@@ -186,4 +186,7 @@ print(ferret_majority_heatmap)
 dev.off()
 
 # Save the updated object to an output Seurat file
-saveRDS(file = file.path(data_dir, "03_combined_ferret_res_7.rds"), ferret_final_majority)
+saveRDS(
+  file = file.path(data_dir, "03_combined_ferret_res_7.rds"),
+  ferret_final_majority
+)
