@@ -1,8 +1,7 @@
-options(Seurat.object.assay.version = "v3")
-
 library(here)
 library(Seurat)
 library(slingshot)
+options(Seurat.object.assay.version = "v3")
 
 source(here("src/common_setup.R"))
 
@@ -36,25 +35,22 @@ source(here("src/common_setup.R"))
 #'   output_prefix = "ferret_ductal_S9E0",
 #'   fitgam_dir = fitgam_dir
 #' )
-run_slingshot_subset <- function(
-  seurat_obj,
-  cluster_col,
-  clusters,
-  start_cluster,
-  end_cluster,
-  output_prefix,
-  fitgam_dir,
-  n_pcs = 15
-) {
+run_slingshot_subset <- function(seurat_obj,
+                                 cluster_col,
+                                 clusters,
+                                 start_cluster,
+                                 end_cluster,
+                                 output_prefix,
+                                 fitgam_dir,
+                                 n_pcs = 15) {
   # Define the cells to keep from the object
   cells_keep <- rownames(
     seurat_obj@meta.data[
-      seurat_obj@meta.data[[cluster_col]] %in% clusters,
-      ,
+      seurat_obj@meta.data[[cluster_col]] %in% clusters, ,
       drop = FALSE
     ]
   )
-  
+
   # Subset to desired clusters
   cluster_subset <- subset(
     seurat_obj,
