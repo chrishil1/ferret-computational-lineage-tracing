@@ -56,7 +56,7 @@ run_tradeseq_pipeline <- function(sample_id,
   counts <- counts[rownames(counts) %in% VariableFeatures(seurat_object), ]
 
   # EvaluateK between k_range for best fit
-  pdf(here(paste0("evaluateK_plots_", sample_id, ".pdf")))
+  pdf(file.path(image_dir, paste0("08_evaluateK_plots_", sample_id, ".pdf")))
   icMat <- evaluateK(
     counts = counts,
     sds = slingshot_object$slingshot,
@@ -67,7 +67,7 @@ run_tradeseq_pipeline <- function(sample_id,
   dev.off()
 
   # Save icMat object to an output file
-  saveRDS(icMat, here(paste0("icmat_", sample_id, ".rds")))
+  saveRDS(icMat, file.path(fitgam_dir, paste0("icmat_", sample_id, ".rds")))
 
   # Extract the slingshot pseudotime and cell weights from the object
   pseudotime <- slingPseudotime(slingshot_object$slingshot, na = FALSE)
