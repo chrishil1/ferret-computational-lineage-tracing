@@ -3,6 +3,7 @@ import scanpy as sc
 import cellrank as cr
 import numpy as np
 import matplotlib as mpl
+import os
 
 # Ensure text is stored as editable fonts, not vector paths
 mpl.rcParams["pdf.fonttype"] = 42  # TrueType font
@@ -67,6 +68,12 @@ def ferret_acinar():
         determination
     """
 
+    # Set the output save file directories
+    figdir = "figures/12_cellrank_plots/ferret_acinar"
+    os.makedirs(figdir, exist_ok=True)
+    sc.settings.figdir = figdir
+    cr.settings.figdir = figdir
+
     # Load in pseudotime and weights for this specific acinar lineage
     ferret_acinar_pseudotime = pd.read_csv(
         "pseudotime_objects/ferret_acinar_s9e10_pseudotime.csv", index_col=0
@@ -100,7 +107,7 @@ def ferret_acinar():
     # Visualize transition matrix
     pk.plot_projection(
         color="majority_celltype",
-        save="projection_ferret_acinar.svg",
+        save=os.path.join(figdir, "projection_ferret_acinar.svg"),
         palette=human_palette,
         legend_loc="right",
         figsize=(8, 6),
@@ -128,15 +135,16 @@ def ferret_acinar():
         which="terminal",
         legend_loc="right",
         s=100,
-        save="ferret_acinar_macrostates_terminal.pdf",
+        save=os.path.join(figdir, "ferret_acinar_macrostates_terminal.pdf"),
     )
     g.plot_macrostates(
         which="terminal",
         discrete=False,
-        save="ferret_acinar_macrostates_terminal_discrete.pdf",
+        save=os.path.join(figdir, "ferret_acinar_macrostates_terminal_discrete.pdf"),
     )
     g.plot_fate_probabilities(
-        same_plot=False, save="ferret_acinar_fate_probabilities_separate.pdf"
+        same_plot=False,
+        save=os.path.join(figdir, "ferret_acinar_fate_probabilities_separate.pdf"),
     )
     cr.pl.circular_projection(
         adata_ferret_acinar,
@@ -366,6 +374,11 @@ def ferret_ductal():
         Several .pdf files that highlight different parts of the fate
         determination
     """
+    # Set the output save file directories
+    figdir = "figures/12_cellrank_plots/ferret_ductal"
+    os.makedirs(figdir, exist_ok=True)
+    sc.settings.figdir = figdir
+    cr.settings.figdir = figdir
 
     # Load in pseudotime and weights for this specific ductal lineage
     ferret_ductal_pseudotime = pd.read_csv(
@@ -400,7 +413,7 @@ def ferret_ductal():
     # Visualize transition matrix
     pk.plot_projection(
         color="majority_celltype",
-        save="projection_ferret_ductal.svg",
+        save=os.path.join(figdir, "projection_ferret_ductal.svg"),
         palette=human_palette,
         legend_loc="right",
         figsize=(8, 6),
@@ -422,15 +435,16 @@ def ferret_ductal():
         which="terminal",
         legend_loc="right",
         s=100,
-        save="ferret_ductal_macrostates_terminal.pdf",
+        save=os.path.join(figdir, "ferret_ductal_macrostates_terminal.pdf"),
     )
     g.plot_macrostates(
         which="terminal",
         discrete=False,
-        save="ferret_ductal_macrostates_terminal_discrete.pdf",
+        save=os.path.join(figdir, "ferret_ductal_macrostates_terminal_discrete.pdf"),
     )
     g.plot_fate_probabilities(
-        same_plot=False, save="ferret_ductal_fate_probabilities_separate.pdf"
+        same_plot=False,
+        save=os.path.join(figdir, "ferret_ductal_fate_probabilities_separate.pdf"),
     )
     cr.pl.circular_projection(
         adata_ferret_ductal,
@@ -607,6 +621,12 @@ def human_acinar():
         determination
     """
 
+    # Set the output save file directories
+    figdir = "figures/12_cellrank_plots/human_acinar"
+    os.makedirs(figdir, exist_ok=True)
+    sc.settings.figdir = figdir
+    cr.settings.figdir = figdir
+
     # Load in pseudotime and weights for this specific acinar lineage
     human_acinar_pseudotime = pd.read_csv(
         "pseudotime_objects/human_acinar_s10e2_pseudotime.csv", index_col=0
@@ -645,7 +665,7 @@ def human_acinar():
     # Visualize transition matrix
     pk.plot_projection(
         color="Celltype",
-        save="projection_human_acinar.svg",
+        save=os.path.join(figdir, "projection_human_acinar.svg"),
         palette=human_palette,
         legend_loc="right",
         figsize=(8, 6),
@@ -672,15 +692,16 @@ def human_acinar():
         which="terminal",
         legend_loc="right",
         s=100,
-        save="human_acinar_macrostates_terminal.pdf",
+        save=os.path.join(figdir, "human_acinar_macrostates_terminal.pdf"),
     )
     g.plot_macrostates(
         which="terminal",
         discrete=False,
-        save="human_acinar_macrostates_terminal_discrete.pdf",
+        save=os.path.join(figdir, "human_acinar_macrostates_terminal_discrete.pdf"),
     )
     g.plot_fate_probabilities(
-        same_plot=False, save="human_acinar_fate_probabilities_separate.pdf"
+        same_plot=False,
+        save=os.path.join(figdir, "human_acinar_fate_probabilities_separate.pdf"),
     )
     cr.pl.circular_projection(
         adata_human_acinar,
@@ -874,6 +895,12 @@ def human_ductal():
         determination
     """
 
+    # Set the output save file directories
+    figdir = "figures/12_cellrank_plots/human_ductal"
+    os.makedirs(figdir, exist_ok=True)
+    sc.settings.figdir = figdir
+    cr.settings.figdir = figdir
+
     # Load in pseudotime and weights for this specific ductal lineage
     human_ductal_pseudotime = pd.read_csv(
         "pseudotime_objects/human_ductal_s10e19_pseudotime.csv", index_col=0
@@ -912,7 +939,7 @@ def human_ductal():
     # Visualize transition matrix
     pk.plot_projection(
         color="Celltype",
-        save="projection_human_ductal.svg",
+        save=os.path.join(figdir, "projection_human_ductal.svg"),
         palette=human_palette,
         legend_loc="right",
         figsize=(8, 6),
@@ -939,15 +966,16 @@ def human_ductal():
         which="terminal",
         legend_loc="right",
         s=100,
-        save="human_ductal_macrostates_terminal.pdf",
+        save=os.path.join(figdir, "human_ductal_macrostates_terminal.pdf"),
     )
     g.plot_macrostates(
         which="terminal",
         discrete=False,
-        save="human_ductal_macrostates_terminal_discrete.pdf",
+        save=os.path.join(figdir, "human_ductal_macrostates_terminal_discrete.pdf"),
     )
     g.plot_fate_probabilities(
-        same_plot=False, save="human_ductal_fate_probabilities_separate.pdf"
+        same_plot=False,
+        save=os.path.join(figdir, "human_ductal_fate_probabilities_separate.pdf"),
     )
     cr.pl.circular_projection(
         adata_human_ductal,

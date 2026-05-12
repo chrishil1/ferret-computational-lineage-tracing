@@ -174,7 +174,7 @@ process_and_run <- function(file,
 }
 
 # Load in the background genes common in both objects
-background_genes <- read.csv(here("csv_files/background_genes.csv"))$Genes
+background_genes <- read.csv(file.path(csv_dir, "background_genes.csv"))$Genes
 
 # Run the processing for human acinar driving genes
 process_and_run(

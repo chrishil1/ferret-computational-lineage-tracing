@@ -187,7 +187,7 @@ def get_cumulative_gene_plot(ferret_scores, human_scores, celltype):
     plt.legend(loc="best")
 
     # Save the output figure
-    fig.savefig(f"output_images/gene_plot_{celltype}.pdf", dpi=fig.dpi)
+    fig.savefig(f"output_images/13_gene_plot_{celltype}.pdf", dpi=fig.dpi)
 
 
 def get_combined_scores(ferret_score, human_score):
@@ -272,7 +272,7 @@ def get_lineage_heatmap(ferret_score, human_score, celltype):
     plt.title(f"Lineage Correlation Scores ({celltype})")
 
     # Save to our output figure
-    fig.savefig(f"output_images/gene_plot_heatmap_{celltype}.pdf", dpi=fig.dpi)
+    fig.savefig(f"output_images/13_gene_plot_heatmap_{celltype}.pdf", dpi=fig.dpi)
 
 
 if __name__ == "__main__":

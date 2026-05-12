@@ -6,6 +6,8 @@ library(SeuratDisk)
 library(slingshot)
 options(Seurat.object.assay.version = "v3")
 
+source(here("src/common_setup.R"))
+
 # Read in our final species objects
 final_ferret <- readRDS(file.path(data_dir, "05_final_ferret.rds"))
 final_human <- readRDS(file.path(data_dir, "05_final_human.rds"))
