@@ -23,7 +23,7 @@ library(TFBSTools)
 library(tradeSeq)
 
 source(here("src/common_setup.R"))
-source(here("src/07_ferret_lineages_helpers.R"))
+source(here("src/09_ferret_lineages_helpers.R"))
 ggplot2::theme_set(ggplot2::theme_classic(base_size = 10))
 options(Seurat.object.assay.version = "v3")
 

@@ -26,9 +26,6 @@ get_query_names <- function(seurat_object,
   all_seurat_genes <- FALSE
   only_positive <- FALSE
 
-  # Load Seurat Object
-  mapping_file <- read.csv(here("species_mapping_file.csv"))
-
   # Get all genes mapped to their ortholog
   all_genes <- get_all_genes(
     seurat_object = seurat_object,
@@ -323,7 +320,6 @@ make_lineage_heatmaps <- function(slingshot_sce,
 
   # Subset the Seurat object based on the selected cells
   seurat_sub <- seurat_sub[, ordered_cells_subset]
-
 
   top_genes <- rownames(head(filtered_res, 200))
   expr_mat <- GetAssayData(seurat_sub, layer = "data", assay = "RNA")

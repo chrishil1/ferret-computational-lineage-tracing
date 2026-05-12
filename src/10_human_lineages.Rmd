@@ -23,7 +23,8 @@ library(TFBSTools)
 library(tradeSeq)
 
 source(here("src/common_setup.R"))
-source(here("src/08_human_lineages_helper.R"))
+source(here("src/10_human_lineages_helper.R"))
+
 options(Seurat.object.assay.version = "v3")
 ggplot2::theme_set(ggplot2::theme_classic(base_size = 10))
 
@@ -49,7 +50,7 @@ pca_subset <- reducedDim(sce, "PCA")
 # Ductal Lineages {.tabset}
 ```{r "Human new pseudotime S10E19", fig.width=12,fig.height=7, echo = FALSE, warning = FALSE, message = FALSE}
 # Load in fitgam calculations
-fitgam_sce <- readRDS(here(fitgam_dir, "fitgam_human_ductal_s10e19.rda"))
+fitgam_sce <- readRDS(file.path(fitgam_dir, "fitgam_human_ductal_s10e19.rda"))
 
 # Calculate lineage associations from query genes
 query_names <- get_query_names(cluster_subset, cluster_number = 10)
@@ -122,7 +123,7 @@ pca_subset <- reducedDim(sce, "PCA")
 
 ```{r "Human new pseudotime S10E2", fig.width=12,fig.height=7, echo = FALSE, warning = FALSE, message = FALSE}
 # Load in fitgam calculations
-fitgam_sce <- readRDS(here(fitgam_dir, "fitgam_human_acinar_s10e2.rda"))
+fitgam_sce <- readRDS(file.path(fitgam_dir, "fitgam_human_acinar_s10e2.rda"))
 
 # Calculate lineage associations from query genes
 query_names <- get_query_names(cluster_subset, cluster_number = 10)
