@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sns
+import os
 
 # Adjust parameters for output plots
 pd.set_option("display.max_rows", None)
@@ -31,7 +32,6 @@ def get_scaled_correlation_scores(filename, index_corr, index_low, index_high):
     Scaled and clipped tuple (to [-1, 1]) correlation scores, lower bounds,
     and upper bounds, respectively.
     """
-
     # Read in csv file containing output scores and confidence intervals
     celltype_df = pd.read_csv(filename, index_col=0)
     scores = celltype_df.iloc[:, index_corr]
@@ -47,6 +47,13 @@ def get_scaled_correlation_scores(filename, index_corr, index_low, index_high):
     scores_scaled = np.clip(scores / scaling_factor, -1, 1)
     ci_low_scaled = np.clip(ci_low / scaling_factor, -1, 1)
     ci_high_scaled = np.clip(ci_high / scaling_factor, -1, 1)
+
+    # Save the scaled scores to an output csv file
+    output_df = celltype_df.copy()
+    output_df["scaled_correlation"] = scores_scaled
+
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+    output_df.to_csv(f"csv_files/{base_name}_scaled.csv")
 
     # Return the pandas tuples
     return scores_scaled, ci_low_scaled, ci_high_scaled
@@ -107,7 +114,7 @@ def get_cumulative_gene_plot(ferret_scores, human_scores, celltype):
     - Shaded regions represent confidence intervals derived from the
       lower and upper bounds of the input scores.
     - Output file is saved to:
-        'output_images/gene_plot_<celltype>.pdf'
+        'figures/gene_plot_<celltype>.pdf'
     """
 
     # Define threshold as 50 evenly spaced values
@@ -187,7 +194,7 @@ def get_cumulative_gene_plot(ferret_scores, human_scores, celltype):
     plt.legend(loc="best")
 
     # Save the output figure
-    fig.savefig(f"output_images/13_gene_plot_{celltype}.pdf", dpi=fig.dpi)
+    fig.savefig(f"figures/13_gene_plot_{celltype}.pdf", dpi=fig.dpi)
 
 
 def get_combined_scores(ferret_score, human_score):
@@ -272,7 +279,7 @@ def get_lineage_heatmap(ferret_score, human_score, celltype):
     plt.title(f"Lineage Correlation Scores ({celltype})")
 
     # Save to our output figure
-    fig.savefig(f"output_images/13_gene_plot_heatmap_{celltype}.pdf", dpi=fig.dpi)
+    fig.savefig(f"figures/13_gene_plot_heatmap_{celltype}.pdf", dpi=fig.dpi)
 
 
 if __name__ == "__main__":
