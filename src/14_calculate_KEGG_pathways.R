@@ -6,6 +6,8 @@ library(pathview)
 library(Seurat)
 library(tidyverse)
 
+source(here("src/common_setup.R"))
+
 #' Run KEGG pathway enrichment and generate bubble plots.
 #'
 #' This function performs gene set enrichment analysis using `gost`
@@ -107,10 +109,10 @@ run_enrichment <- function(query_names,
     theme(axis.text.y = element_text(size = 10))
 
   # Save the bubble plots to the output directory
-  ggsave(paste0("output_images/kegg_bubble_recall_", name, ".pdf"),
+  ggsave(file.path(image_dir, "14_KEGG_pathways", paste0("14_", name, "_kegg_recall.pdf")),
     plot = bubble_plot, width = 10, height = 8, bg = "white"
   )
-  ggsave(paste0("output_images/kegg_bubble_pvalue_", name, ".pdf"),
+  ggsave(file.path(image_dir, "14_KEGG_pathways", paste0("14_", name, "_kegg_pvalue.pdf")),
     plot = bubble_plot_p_value, width = 10, height = 8, bg = "white"
   )
 }
@@ -178,28 +180,28 @@ background_genes <- read.csv(file.path(csv_dir, "background_genes.csv"))$Genes
 
 # Run the processing for human acinar driving genes
 process_and_run(
-  "go_files/acinar_maturing_driver_genes_human_scaled.csv",
+  file.path(csv_dir, "acinar_maturing_driver_genes_human_scaled.csv"),
   "Acinar.Maturing_qval",
   "human_acinar"
 )
 
 # Run the processing for human ductal driving genes
 process_and_run(
-  "go_files/ductal_immature_1_driver_genes_human_scaled.csv",
+  file.path(csv_dir, "ductal_immature_1_driver_genes_human_scaled.csv"),
   "Ductal.Immature_1_qval",
   "human_ductal"
 )
 
 # Run the processing for ferret acinar driving genes
 process_and_run(
-  "go_files/acinar_maturing_driver_genes_ferret_scaled.csv",
+  file.path(csv_dir, "acinar_maturing_driver_genes_ferret_scaled.csv"),
   "Acinar.Maturing_qval",
   "ferret_acinar"
 )
 
 # Run the processing for ferret ductal driving genes
 process_and_run(
-  "go_files/ductal_proliferating_driver_genes_ferret_scaled.csv",
+  file.path(csv_dir, "ductal_proliferating_driver_genes_ferret_scaled.csv"),
   "Ductal.Proliferating_qval",
   "ferret_ductal"
 )
