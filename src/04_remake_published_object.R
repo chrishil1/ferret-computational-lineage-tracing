@@ -1,7 +1,10 @@
 library(here)
 library(Matrix)
 library(Seurat)
+library(scAnalysisR)
 options(future.globals.maxSize = 8000 * 1024^2)
+
+source(here("src/common_setup.R"))
 
 # Load in the raw samples
 seurat_list <- list()
@@ -37,8 +40,13 @@ merged_so <- merge(seurat_list[[1]], seurat_list[2:length(seurat_list)])
 merged_so <- SCTransform(merged_so)
 merged_so <- ScaleData(merged_so)
 
+saveRDS(merged_so, file.path(data_dir, "04_merged_original_object.rds"))
+
+# May need to reload in object if R session runs out of data
+#merged_so <- readRDS(file.path(data_dir, "04_merged_original_object.rds"))
+
 # Read in published seurat object
-published_object <- readRDS(here("human-fetal-panc-allcells.rds"))
+published_object <- readRDS(file.path(data_dir, "human-fetal-panc-allcells.rds"))
 
 # Subset merged object by cells that are included in final published object
 pub_cells <- Cells(published_object)
@@ -46,7 +54,7 @@ subset_seurat <- subset(merged_so, cells = pub_cells)
 
 # Match metadata rows to the exact cell order in subset_seurat
 matched_cells <- Cells(subset_seurat)
-pub_meta <- pub_seurat@meta.data[matched_cells, , drop = FALSE]
+pub_meta <- published_object@meta.data[matched_cells, , drop = FALSE]
 
 # Direct assignment of metadata
 subset_seurat@meta.data <- pub_meta
@@ -66,5 +74,37 @@ subset_seurat <- RunUMAP(subset_seurat,
   n.neighbors = 50
 )
 
+# Visualize human PCW distribution in UMAP space
+human_pcw_umap <- plotDimRed(subset_seurat,
+                             col_by = "PCW",
+                             color = c("#4285F4", "#FBBC05", "#EA4335"),
+                             plot_type = "umap",
+                             ggrastr = TRUE
+)[[1]]
+
+pdf(
+  file = file.path(image_dir, "04_remade_human_pcw_umap.pdf"),
+  width = 15,
+  height = 12
+)
+print(human_pcw_umap)
+dev.off()
+
+# Visualize human celltype distribution in UMAP space
+human_celltype_umap <- plotDimRed(subset_seurat,
+                                  col_by = "Celltype",
+                                  plot_type = "umap",
+                                  color = human_palette,
+                                  ggrastr = TRUE
+)[[1]]
+
+pdf(
+  file = file.path(image_dir, "04_remake_human_celltype_umap.pdf"),
+  width = 17,
+  height = 12
+)
+print(human_celltype_umap)
+dev.off()
+
 # Save to output RDS file
-saveRDS(subset_seurat, here("04_human_remade_seurat.rds"))
+saveRDS(subset_seurat, file.path(data_dir, "04_human_remade_seurat.rds"))
