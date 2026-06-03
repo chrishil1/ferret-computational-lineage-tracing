@@ -6,9 +6,9 @@ library(Seurat)
 library(scAnalysisR)
 
 source(here("src/common_setup.R"))
-source(here("src/03_ferret_renaming_helpers.R"))
+source(here("src/01_dataset_visualization_helpers.R"))
 
-# Load in the Seurat object after integrat
+# Load in the Seurat object after integratation
 merged_object <- readRDS(file.path(data_dir, "02_merged_integrated_object.rds"))
 
 # Subset to just include the ferret cells
@@ -18,7 +18,7 @@ ferret_knn_object <- subset(merged_object, subset = batch == "Ferret")
 ferret_knn_object <- NormalizeData(ferret_knn_object) %>%
   FindVariableFeatures() %>%
   ScaleData() %>%
-  RunPCA(npcs = 15) %>%
+  RunPCA(npcs = 15) %>% 
   FindNeighbors(dims = 1:15) %>%
   FindClusters(resolution = 0.8) %>%
   RunUMAP(reduction = "pca", dims = 1:15)
@@ -168,12 +168,12 @@ ferret_majority_heatmap <-
     n = 100,
     upregulated = TRUE,
     palette = blue_yellow,
-    custom_order = c(
-      "T lymphocyte", "Delta", "Beta", "Alpha", "B lymphocyte",
-      "Ductal Immature", "Mesenchyme Subtype 1", "Ductal Proliferating",
-      "Acinar Proliferating", "Endothelial Lymphatic", # "Mesenchyme Subtype 2",
-      "Acinar Immature", "Acinar Maturing", "Acinar Progenitor",
-      "Pancreatic Progenitor"
+    custom_order = c("Beta", "Delta", "Alpha", "T lymphocyte",
+                     "Mesenchyme Subtype 1", "Acinar Progenitor",
+                     "Pancreatic Progenitor", "Ductal Immature",
+                     "Ductal Proliferating", "Acinar Proliferating",
+                     "Endothelial Lymphatic", "Acinar Immature",
+                     "Acinar Maturing", "B lymphocyte"
     )
   )
 
