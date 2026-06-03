@@ -6,7 +6,7 @@ library(Seurat)
 library(TFBSTools)
 
 source(here("src/common_setup.R"))
-source(here("src/04_celltype_validation_helpers.R"))
+source(here("src/06_celltype_validation_helpers.R"))
 ggplot2::theme_set(ggplot2::theme_classic(base_size = 10))
 
 # Define the cell types that are found in both datasets
