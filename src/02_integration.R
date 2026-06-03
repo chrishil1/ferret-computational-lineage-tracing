@@ -78,7 +78,7 @@ dev.off()
 merged_ferret <- subset(knn_merged_object, subset = batch == "Ferret")
 
 ferret_integrated_umap <- plotDimRed(merged_ferret,
-  col_by = "final_combined_celltype",
+  col_by = "knn_celltype",
   color = human_palette,
   plot_type = "umap", ggrastr = TRUE
 )[[1]]
