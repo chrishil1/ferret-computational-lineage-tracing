@@ -12,25 +12,10 @@ source(here("src/01_dataset_visualization_helpers.R"))
 ########################
 # Ferret dataset plots #
 ########################
-# ferret_object <- readRDS(file.path(
-#   data_dir,
-#   "01_ferret_processed_object.rds"
-# ))
-# 
-# # TODO - figure out most effective way to plot this
-# 
-# new_ferret_object <- NormalizeData(new_ferret_object)
-# new_ferret_object <- FindVariableFeatures(new_ferret_object)
-# new_ferret_object <- ScaleData(new_ferret_object)
-# new_ferret_object <- RunPCA(new_ferret_object, npcs = 15)
-# new_ferret_object <- FindNeighbors(new_ferret_object, dims = 1:15)
-# new_ferret_object <- FindClusters(new_ferret_object, resolution = 0.8)
-# new_ferret_object <- RunUMAP(new_ferret_object, reduction = "pca", dims = 1:15)
-
 # Load in Seurat object
 ferret_object <- readRDS(file.path(
   data_dir,
-  "01_initial_reclustered_ferret_object.rds"
+  "01_ferret_processed_object.rds"
 ))
 ferret_object$day <- gsub("_b2$", "", ferret_object$sample)
 
@@ -38,7 +23,7 @@ ferret_object$day <- gsub("_b2$", "", ferret_object$sample)
 ferret_day_umap <- plotDimRed(ferret_object,
   col_by = "day",
   color = c("#4285F4", "#34A853", "#FBBC05", "#EA4335"),
-  plot_type = "umap",
+  plot_type = "rna.umap",
   ggrastr = TRUE
 )[[1]]
 
