@@ -301,14 +301,19 @@ calculate_human_knn_mapping <- function(merged_seurat,
     new_labels[i] <- names(sort(table(neighbor_types), decreasing = TRUE))[1]
   }
 
-  # Initialise knn_celltype for all cells, then populate ferret cells with
-  # their kNN-derived labels (with the _human suffix stripped)
+  # Strip _human suffix from kNN-derived labels
+  new_labels <- gsub("_human$", "", new_labels)
+
+  # Store in knn_celltype as before
   merged_seurat@meta.data$knn_celltype <- NA_character_
-  merged_seurat@meta.data[ferret_pulled_cells, "knn_celltype"] <- gsub(
-    "_human$",
-    "",
-    new_labels
-  )
+  merged_seurat@meta.data[ferret_pulled_cells, "knn_celltype"] <- new_labels
+
+  # Overwrite final_combined_celltype for ferret cells with kNN labels
+  # so both species share a consistent column for joint plotting
+  merged_seurat@meta.data[
+    ferret_pulled_cells,
+    "final_combined_celltype"
+  ] <- new_labels
 
   return(merged_seurat)
 }
