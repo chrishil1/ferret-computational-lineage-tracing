@@ -21,7 +21,7 @@ ferret_object <- readRDS(file.path(data_dir, "05_final_ferret.rds"))
 human_object <- readRDS(file.path(data_dir, "05_final_human.rds"))
 human_subset <- subset(human_object, subset = Celltype %in% shared_celltypes)
 
-ferret_genes <- FindAllMarkers(ferret_object, group.by = "majority_celltype")
+ferret_genes <- FindAllMarkers(ferret_object, group.by = "final_renamed_celltype")
 human_genes <- FindAllMarkers(human_object, group.by = "Celltype")
 
 # Function to convert cell types into suffixes for variable naming ease
@@ -34,7 +34,7 @@ for (celltype in shared_celltypes) {
   # Subset Seurat objects based on the current cell type of interest
   assign(paste0("ferret_", suffix), subset(
     ferret_object,
-    majority_celltype == celltype
+    final_renamed_celltype == celltype
   ))
   assign(paste0("human_", suffix), subset(
     human_object,
@@ -76,7 +76,7 @@ combined_genes_unique <- unname(unlist(combined_gene_list))
 initial_ferret_heatmap <- get_validation_heatmap(
   ferret_object,
   custom_order = shared_celltypes,
-  idents = "majority_celltype",
+  idents = "final_renamed_celltype",
   genes_of_interest = combined_genes_unique,
   cluster_rows = FALSE,
   show_rownames = FALSE
@@ -124,12 +124,12 @@ for (cluster in shared_celltypes) {
 final_ferret_heatmap <- get_validation_heatmap(
   ferret_object,
   custom_order = shared_celltypes,
-  idents = "majority_celltype",
+  idents = "final_renamed_celltype",
   genes_of_interest = all_genes_ordered,
   cluster_rows = FALSE,
   show_rownames = FALSE
 )
-pdf(file.path(image_dir, "04_final_ferret_heatmap.pdf"), height = 8, width = 3)
+pdf(file.path(image_dir, "06_final_ferret_heatmap.pdf"), height = 8, width = 3)
 print(final_ferret_heatmap$heatmap)
 dev.off()
 
@@ -142,10 +142,9 @@ final_human_heatmap <- get_validation_heatmap(
   cluster_rows = FALSE,
   show_rownames = FALSE
 )
-pdf(file.path(image_dir, "04_final_human_heatmap.pdf"), height = 8, width = 3)
+pdf(file.path(image_dir, "06_final_human_heatmap.pdf"), height = 8, width = 3)
 print(final_human_heatmap$heatmap)
 dev.off()
-
 
 # Save these genes and their expression data to output csv files
 write.csv(

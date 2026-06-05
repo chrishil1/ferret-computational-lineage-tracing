@@ -29,8 +29,8 @@ ferret_object[["RNA"]]$counts.1 <- NULL
 # Replace ferret gene names with human orthologs, if available
 new_gene_names <- ifelse(rownames(ferret_object) %in% names(mapping_list) &
   mapping_list[rownames(ferret_object)] != "",
-  mapping_list[rownames(ferret_object)],
-  rownames(ferret_object)
+mapping_list[rownames(ferret_object)],
+rownames(ferret_object)
 )
 
 # Remove the names from the new gene mapping
