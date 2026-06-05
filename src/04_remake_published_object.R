@@ -40,11 +40,6 @@ merged_so <- merge(seurat_list[[1]], seurat_list[2:length(seurat_list)])
 merged_so <- SCTransform(merged_so)
 merged_so <- ScaleData(merged_so)
 
-saveRDS(merged_so, file.path(data_dir, "04_merged_original_object.rds"))
-
-# May need to reload in object if R session runs out of data
-#merged_so <- readRDS(file.path(data_dir, "04_merged_original_object.rds"))
-
 # Read in published seurat object
 published_object <- readRDS(file.path(data_dir, "human-fetal-panc-allcells.rds"))
 
