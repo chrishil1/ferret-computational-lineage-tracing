@@ -115,7 +115,7 @@ run_slingshot_subset(
 # Human saving #
 ################
 human_object <- readRDS(
-  file.path(data_dir, "04_human_remade_seurat.rds")
+  file.path(data_dir, "05_final_human.rds")
 )
 Idents(human_object) <- "Leiden_cluster"
 
