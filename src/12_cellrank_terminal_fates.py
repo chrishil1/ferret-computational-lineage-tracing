@@ -93,8 +93,8 @@ def ferret_acinar():
     adata_ferret_acinar = adata_ferret_acinar[
         ~np.isnan(adata_ferret_acinar.obs["pseudotime"])
     ]
-    adata_ferret_acinar.obs["majority_celltype"] = adata_ferret_acinar.obs[
-        "majority_celltype"
+    adata_ferret_acinar.obs["final_renamed_celltype"] = adata_ferret_acinar.obs[
+        "final_renamed_celltype"
     ].astype("category")
 
     # Calculate the nearest neighbors
@@ -106,7 +106,7 @@ def ferret_acinar():
 
     # Visualize transition matrix
     pk.plot_projection(
-        color="majority_celltype",
+        color="final_renamed_celltype",
         save=os.path.join(figdir, "projection_ferret_acinar.svg"),
         palette=human_palette,
         legend_loc="right",
@@ -116,7 +116,7 @@ def ferret_acinar():
 
     # Instantiate the GPCCA esimator and fit to the clusters using celltype
     g = cr.estimators.GPCCA(pk)
-    g.fit(cluster_key="majority_celltype", n_states=5)
+    g.fit(cluster_key="final_renamed_celltype", n_states=5)
 
     # Manually set the terminal states after fit, calculate fate probabilities
     g.set_terminal_states(
@@ -148,7 +148,7 @@ def ferret_acinar():
     )
     cr.pl.circular_projection(
         adata_ferret_acinar,
-        keys=["majority_celltype"],
+        keys=["final_renamed_celltype"],
         legend_loc="right",
         save="ferret_acinar_circular_projection.pdf",
     )
@@ -171,7 +171,7 @@ def ferret_acinar():
     # Calculate lineage drivers with ductal immature as the terminal state
     ductal_immature_df = g.compute_lineage_drivers(
         lineages=["Ductal Immature"],
-        cluster_key="majority_celltype",
+        cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
     adata_ferret_acinar.obs["fate_probabilities_ductal_immature"] = (
@@ -193,7 +193,7 @@ def ferret_acinar():
     # Calculate lineage drivers with acinar maturing as the terminal state
     acinar_mat_df = g.compute_lineage_drivers(
         lineages=["Acinar Maturing"],
-        cluster_key="majority_celltype",
+        cluster_key="final_renamed_celltype",
         clusters=[
             "Acinar Proliferating",
             "Acinar Immature",
@@ -224,7 +224,7 @@ def ferret_acinar():
     # Calculate lineage drivers with acinar proliferating as the terminal state
     acinar_prolif_df = g.compute_lineage_drivers(
         lineages=["Acinar Proliferating"],
-        cluster_key="majority_celltype",
+        cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
     adata_ferret_acinar.obs["fate_probabilities_acinar_proliferating"] = (
@@ -246,7 +246,7 @@ def ferret_acinar():
     # Calculate lineage drivers with pancreatic progenitor as the terminal state
     pancreatic_progenitor_df = g.compute_lineage_drivers(
         lineages=["Pancreatic Progenitor"],
-        cluster_key="majority_celltype",
+        cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
     adata_ferret_acinar.obs["fate_probabilities_pancreatic_progenitor"] = (
@@ -268,7 +268,7 @@ def ferret_acinar():
     # Calculate lineage drivers with endothelial lympathic as the terminal state
     endothelial_lympathic_df = g.compute_lineage_drivers(
         lineages=["Endothelial Lymphatic"],
-        cluster_key="majority_celltype",
+        cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
     adata_ferret_acinar.obs["fate_probabilities_endothelial_lympathic"] = (
@@ -399,8 +399,8 @@ def ferret_ductal():
     adata_ferret_ductal = adata_ferret_ductal[
         ~np.isnan(adata_ferret_ductal.obs["pseudotime"])
     ]
-    adata_ferret_ductal.obs["majority_celltype"] = adata_ferret_ductal.obs[
-        "majority_celltype"
+    adata_ferret_ductal.obs["final_renamed_celltype"] = adata_ferret_ductal.obs[
+        "final_renamed_celltype"
     ].astype("category")
 
     # Calculate the nearest neighbors
@@ -412,7 +412,7 @@ def ferret_ductal():
 
     # Visualize transition matrix
     pk.plot_projection(
-        color="majority_celltype",
+        color="final_renamed_celltype",
         save=os.path.join(figdir, "projection_ferret_ductal.svg"),
         palette=human_palette,
         legend_loc="right",
@@ -422,7 +422,7 @@ def ferret_ductal():
 
     # Instantiate the GPCCA esimator and fit to the clusters using celltype
     g = cr.estimators.GPCCA(pk)
-    g.fit(cluster_key="majority_celltype", n_states=4)
+    g.fit(cluster_key="final_renamed_celltype", n_states=4)
 
     # Manually set the terminal states after fit, calculate fate probabilities
     g.set_terminal_states(
@@ -448,7 +448,7 @@ def ferret_ductal():
     )
     cr.pl.circular_projection(
         adata_ferret_ductal,
-        keys=["majority_celltype"],
+        keys=["final_renamed_celltype"],
         legend_loc="right",
         save="ferret_ductal_circular_projection.pdf",
     )
@@ -467,7 +467,7 @@ def ferret_ductal():
     # Calculate lineage drivers with ductal immature_1 as the terminal state
     ductal_immature_1_df = g.compute_lineage_drivers(
         lineages=["Ductal Immature_1"],
-        cluster_key="majority_celltype",
+        cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
     adata_ferret_ductal.obs["fate_probabilities_ductal_immature_1"] = (
@@ -492,7 +492,7 @@ def ferret_ductal():
     # Calculate lineage drivers with ductal immature_2 as the terminal state
     ductal_immature_2_df = g.compute_lineage_drivers(
         lineages=["Ductal Immature_2"],
-        cluster_key="majority_celltype",
+        cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
     adata_ferret_ductal.obs["fate_probabilities_ductal_immature_2"] = (
@@ -517,7 +517,7 @@ def ferret_ductal():
     # Calculate lineage drivers with acinar proliferating as the terminal state
     ductal_proliferating_df = g.compute_lineage_drivers(
         lineages=["Ductal Proliferating"],
-        cluster_key="majority_celltype",
+        cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
     adata_ferret_ductal.obs["fate_probabilities_ductal_proliferating"] = (

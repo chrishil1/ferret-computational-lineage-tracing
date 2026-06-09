@@ -103,7 +103,7 @@ Convert("pseudotime_objects/human_acinar.h5Seurat", dest = "h5ad")
 # Ferret object saving #
 ########################
 # Subset to ductal clusters only
-ductal_clusters <- c(9, 0, 5, 12, 17, 10)
+ductal_clusters <- c(9, 0, 5, 12, 17)
 ductal_subset <- subset(final_ferret,
   subset = seurat_clusters %in% ductal_clusters
 )

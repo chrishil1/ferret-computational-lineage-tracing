@@ -23,7 +23,7 @@ library(TFBSTools)
 library(tradeSeq)
 
 source(here("src/common_setup.R"))
-source(here("src/10_human_lineages_helper.R"))
+source(here("src/09_10_lineage_helpers.R"))
 
 options(Seurat.object.assay.version = "v3")
 ggplot2::theme_set(ggplot2::theme_classic(base_size = 10))
@@ -63,7 +63,8 @@ curves <- get_curves(
   reduced_dim = pca_subset,
   reduction = "umap",
   start_cluster = 10,
-  end_cluster = 19
+  end_cluster = 19,
+  dataset = "human"
 )
 ```
 
@@ -79,7 +80,8 @@ lineage_plot <- getplots(
   dimension = "umap",
   lineage = 2,
   pseudotime_limit = 70,
-  trim_index = 9000
+  trim_index = 9000,
+  dataset = "human"
 )
 
 # Print slingshot lineage plot
@@ -98,7 +100,7 @@ plots <- make_lineage_heatmaps(
   pval_cutoff = 0.05,
   save_dir = image_dir,
   fraction = 70,
-  day = FALSE
+  dataset = "human"
 )
 
 # Print significant genes heatmap
@@ -136,7 +138,8 @@ curves <- get_curves(
   reduced_dim = pca_subset,
   reduction = "umap",
   start_cluster = 10,
-  end_cluster = 2
+  end_cluster = 2,
+  dataset = "human"
 )
 ```
 
@@ -152,7 +155,8 @@ lineage_plot <- getplots(
   dimension = "umap",
   lineage = 1,
   pseudotime_limit = 80,
-  trim_index = 23000
+  trim_index = 23000,
+  dataset = "human"
 )
 
 # Print slingshot lineage plot
@@ -171,7 +175,7 @@ plots <- make_lineage_heatmaps(
   pval_cutoff = 0.05,
   save_dir = image_dir,
   fraction = 80,
-  day = FALSE
+  dataset = "human"
 )
 
 # Print slingshot lineage plot

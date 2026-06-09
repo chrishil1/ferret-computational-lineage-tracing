@@ -9,4 +9,5 @@ TODOs.md
 plots/
 *.html
 *.h5ad
+*.h5Seurat
 csv_files
