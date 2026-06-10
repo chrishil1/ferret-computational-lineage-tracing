@@ -104,7 +104,7 @@ plots <- make_lineage_heatmaps(
 )
 
 # Print significant genes heatmap
-print(plots$sig_genes_plot$heatmap)
+print(plots$heatmap)
 ```
 
 # Acinar Lineages {.tabset}
@@ -179,5 +179,5 @@ plots <- make_lineage_heatmaps(
 )
 
 # Print slingshot lineage plot
-print(plots$sig_genes_plot$heatmap)
+print(plots$heatmap)
 ```
