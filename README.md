@@ -77,7 +77,33 @@ In order to run `fitGAM` on the identified pseudotime slingshot trajectories, th
 
 #### `08_run_fitgam.R`
 
-With the files saved, we can now utilize the functions from the `tradeSeq` R package to identify genes associated with the pseudotime lineages in the two species. To do so, our `run_tradeseq_pipeline` function reads in 
+With the files saved, we can now utilize the functions from the `tradeSeq` R package to identify genes associated with the pseudotime lineages in the two species. To do so, our `run_tradeseq_pipeline` function reads in the saved `Seurat` and `SingleCellExperiment` objects, extracting the cells involved in the pseudotime trajectory from the object and finding variable features before running the `evaluateK` function. We determined a value of 7 for K fit the four trajectories the best, so that value, the psuedotime values, and cell counts and their weights are all fed into the `fitGAM` function with the final output saved to `.rda` files.
+
+#### `09_ferret_lineages.Rmd`
+
+The first of two R markdown files in this analysis pipeline, we take the ortholog mapped and subset ferret `Seurat` object and calculate pseudotime computational lineages to have in hand when we compare to the human lineages. In these trials, we identify a ductal lineage from clusters 9 to 0, and an acinar lineage from clusters 9 to 10, subset the clusters associated with these ductal or acinar specify cell types, then run `slingshot` with the top 15 PCs to get the pseudotime curves. This with the loaded in `tradeSeq` `fitGAM` models is used to test which genes are most significantly associated with each lineage in the two cell type trajectories. For each lineage, we compute a UMAP plot of the pseudotime curve and a heatmap of the significant differentially expressed genes along the trajectory.
+
+#### `10_human_lineages.Rmd`
+
+The companion R markdown to the ferret trajectory in this analysis pipeline, we again calculate pseudotime computational lineages to compare to the ferret lineages. In these trials, we identify a ductal lineage from clusters 10 to 19, and an acinar lineage from clusters 10 to 2, subset the clusters associated with these ductal or acinar specify cell types, then run `slingshot` with the top 15 PCs to get the pseudotime curves. This with the loaded in `tradeSeq` `fitGAM` models is used to test which genes are most significantly associated with each lineage in the two cell type trajectories. For each lineage, we compute a UMAP plot of the pseudotime curve and a heatmap of the significant differentially expressed genes along the trajectory. All of these plots are compared alongside the ferret equivalent file to assess the quality of the computational trajectories.
+
+The helper `.R` function for these two markdown files contains dataset specific configuration functions to supply the correct metadata columns per species, orthlogy and query gene helper functions to find cluster markers and map them to the human gene list for the ferret dataset, the core logic for running `slingshot` on the `SingleCellExperiment` object and embedding the trajectories onto the UMAPs, and and series of plotting helpers for the violin, UMAP, and heatmaps looking at the expression of DE genes.
+
+#### `11_save_for_cellrank.R`
+
+The `Seurat` and `slingshot` `SingleCellExperiment` objects next need to be processed with `CellRank` to calculate terminal cell fate probabilities, which requires conversion of the file types so they can be imported into python. All of the same trajectories from the previous step are recalculated with the same start/end clusters and subsetted objects that focus on the ductal or acinar cell types, and the resulting pseudotime and cell weight values are written to `.csv` files while the objects are written into `.h5Seurat` files and converted into a `.h5ad` AnnData file format. These files are now ready to be loaded into a python environment in another IDE.
+
+#### `12_cellrank_terminal_fates.py`
+
+Now in python, this script runs `CellRank` terminal cell fate mapping analysis on each of the four species/lineage combinations (ferret acinar/ductal, human acinar/ductal). For each computational lineage, the `.h5ad` AnnData and pseudotime and cell weight `.csv` files are loaded in with the correct lineage extracted from the `slingshot` objects. To match the degree of differentiation between the two species, the human pseudotime was capped at manually tested thresholds so the resulting terminal cell fate calculations were comparable. A k-Nearest Neighbor graph with a PseudotimeKerneal transition matrix was created, and a GPCCA estimator with manually set terminal cell fates was fit on the datasets. From there, a series of transition projections, fate probability maps, circular projections, and UMAPs colored by fate probabilities for computational lineage driver genes for each terminal state are plotted, and `.csv` files are created of these computational lineage drivers. Finally, the two gene lists of interest, the `well-associated` and `ferret-specific` marker gene panels were plotted.
+
+#### `13_correlation_scoring.py`
+
+Still in python, this script loads in the species specific computational lineage drivers and scales their correlation scores by their 1st and 99th percentile magnitude and clips them to be between -1 and 1 to reduce outlier influence. This directly follows the method outlined by [TODO: Theis reference]. For each cell type, a cumulative overlap plot is created by counting how many genes pass a threshold of correlation scores for the human dataset, the ferret dataset, and in both dataset, plotted all togehter on a single plot. Finally, the human and ferret scaled correlation socres are merged for the shared genes and classifies each gene as either `human-specific`, `ferret-specific`, or `well-associated` in both with a threshold of 0.7 as the gene correlation cutoff. A heatmap that compares these three groups of genes is created to highlight the percentage of marker genes that belong to a specific group.
+
+#### `14_calculate_KEGG_pathways.R`
+
+Back to an R environment, this script runs KEGG pathway enrichment analysis on the computational lineage driver genes that were pulled out from the `CellRank` steps. Using the `gost` enrichment function, we take a set of query genes and the custom background list generated earlier in the pipline and pull out the top KEGG pathway terms, sort by the p-values, and generate bubble plots of the top 25 most significant pathways shown first by p-value and then by recall. The scaled correlation score `.csv` files are read in and split by the correlation threshold of 0.7, then run with 3 groups of either all strongly correlated genes, positively correlated genes, or negatively correlated genes, and then creates these two plots for every combination for the 4 pseudotime lineages.
 
 ## Outputs
 
