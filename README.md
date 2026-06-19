@@ -39,7 +39,31 @@ The `csv` files containing lineage weights and pseudotime values that were gener
 
 ### `src`
 
-The directory in which all of the source scripts that were utilized in this analysis are located. Most files contain `_helpers.R` files that include a series of helper functions specific to that step, and there is also a `common_setup.R` function that is run prior to all of the R scripts to load in files, directories, and color palettes. Please find a more detailed explanation of each file within this directory.
+The directory in which all of the source scripts that were utilized in this analysis are located. Most files contain `_helpers.R` files that include a series of helper functions specific to that step, and there is also a `common_setup.R` function that is run prior to all of the R scripts to load in files, directories, and color palettes. More specifically for each of the files located in this directory:
+
+#### `01_dataset_visualization.R`
+
+As an initial overview of the datasets we have available, this script loads in our scRNA-seq ferret dataset and the published snRNA-seq human dataset. The day attribute is used from the ferret dataset (days 22, 24, 28, 35) to visualize the population distribution in UMAP space and gene expression patterns across the four collection windows in a heatmap. Similarly, the post-conception weeks (PCW) attribute from the human dataset is used to visualize the population distribution in UMAP space, and gene expression patterns are calculated across the cell types in a heatmap and a barplot to view how it changes across the 3 collection windows.
+
+The helper `.R` file for this step contains a barplot plotting helper function and logic to extract the differentially expressed genes using `FindAllMarkers` and plot them on a heatmap.
+
+#### `02_integration.R`
+
+After the datasets have been loaded in, we calculate the ferret-human integration using the `Seurat` CCA-Integration method to merge the datasets in UMAP space using calculated PCA embeddings. Upon integration, the combined dataset is visualized in UMAP space by species to see how the two datasets overlap, before a k-Nearest Neighbors strategy with k=10 is used to label each ferret cell with the majority cell type of the 10 nearest human cell types. Upon performing this labeling, the merged dataset is again visualized in UMAP space to determine the effectiveness of the relabeling, and then each species separately to get a general idea of the cell type numbers for the ferret dataset.
+
+The helper `.R` file for this step contains an ortholog function that converts the ferret gene names into human gene names where possible, as well as the main integration calculation helper function that only uses the genes included in both datasets for downstream Normalization, Scaling, and PCA calculation. Also included is a `subset_anova_genes` helper function to aid in removing genes that would be highly species-specific and biasing, and the final kNN mapping helper that relabels all of the ferret cells with the majority cell type from the human neighbors.
+
+#### `03_ferret_renaming.R`
+
+With the ferret cells now mapped with their new human kNN celltype, we perform a series of cleanup steps here before the downstream analysis continues. Contained in this file is logic that renormalizes, scales, and calculates seurat clusters and PCA/UMAP embeddings to create a visualization more similar to the one we started with in step 1 for the ferret dataset. We visualize this UMAP projection then calculate clustering at a higher resolution of 7. Upon doing so, all cells in each cluster are renamed with their majority within these subpopulations, and the clusters are then recalculated with a resolution of 0.8. The final step is a manual renaming of 4 clusters to be completely of one cell type (Alpha, Beta, Delta, Ductal immune), and then a series of visualizations are created in UMAP space to trace these steps. Finally, a differential expression (DE) heatmap is calculated to validate that these populations have unique gene expression patterns as we did with the original human `Seurat` object.
+
+#### `04_remake_published_object.R`
+
+The downstream pseudotime computational lineages require the original PCA embeddings of the human dataset, which were not available in the author's published `Seurat` `.rds` object. This script then attempts to regenerate these embeddings using the raw barcode, feature, and matrix objects for each of the six samples included in the human snRNA-seq dataset. A `Seurat` object is made per sample, and all six `Seurat` objects then merged, SCTransformed, and scaled as per the authors methods. Only the cells present in the final published object were subset, and then a series of SCTransform and PCA/UMAP embedding calculations were performed before visualizing the final projection as sufficient for downstream analysis. 
+
+#### `05_create_subset_species_objects.R`
+
+Similar to what was done in the integration step, all downstream gene regulatory program analysis needed to be done on the same set of genes per species. As a result, this script reads in our two species objects and maps the ferret genes to the human orthologs where an entry was available. The human dataset requires the Ensembl ID's to be converted into their gene symbols as well to match the ferret dataset and it's newly converted names, so a `biomaRt` instance is created and converted before standard normalization and scaling processing steps was performed on the two datasets. Finally, the two gene lists from the specis are intersected, and only the genes present in kept in the two `Seurat` objects. These genes will also be the complete set of genes serving as the background for the eventual KEGG analysis, so we save those to a `csv` file for later.
 
 ## Outputs
 
