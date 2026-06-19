@@ -4,7 +4,7 @@ This repository contains the full analysis pipeline and associated scripts for t
 
 ## Overview
 
-This study utilizes a single-cell RNA sequencing dataset of the ferret (Mustela furo) and a single-nucleus RNA sequencing dataset of the human to investigate the validity of the ferret species as a model for early pancreatic development, specifically in the ductal and acinar pancreatic cell types. The goal of this analysis is to gather pancreatic cell types from the human dataset and apply them to the ferret scRNA-seq dataset, then create pseudotime lineages in both species and compare the gene regulatory programs through early differentiation. This is made possible through the `Seurat` integration toolkit, the `slingshot` and `fitGAM` R packages, and the `CellRank` python package to explore a wide variety of computational lineages through captured timepoints.
+This study utilizes a single-cell RNA sequencing dataset of the ferret (_Mustela furo_) and a single-nucleus RNA sequencing dataset of the human to investigate the validity of the ferret species as a model for early pancreatic development, specifically in the ductal and acinar pancreatic cell types. The goal of this analysis is to gather pancreatic cell types from the human dataset and apply them to the ferret scRNA-seq dataset, then create pseudotime lineages in both species and compare the gene regulatory programs through early differentiation. This is made possible through the `Seurat` integration toolkit, the `slingshot` and `fitGAM` R packages, and the `CellRank` python package to explore a wide variety of computational lineages through captured timepoints.
 
 Please contact [christopher.2.hill\@cuanschutz.edu](mailto:christopher.2.hill@cuanschutz.edu) with any questions.
 
@@ -13,21 +13,17 @@ Please contact [christopher.2.hill\@cuanschutz.edu](mailto:christopher.2.hill@cu
 This repository provides a complete pipeline for the ferret-human scRNA-seq/snRNA-seq integration and computational lineage tracing. Specifically, it:
 
 -   Visualizes the ferret scRNA-seq and human snRNA-seq datasets in UMAP space and validates the human cell type naming scheme
--   Performs Seurat's CCA Integration between the two datasets using PCA embeddings and renames the ferret cells according to a k-Nearest Neighbors (k=10) strategy
+-   Performs `Seurat` CCA Integration between the two datasets using PCA embeddings and renames the ferret cells according to a k-Nearest Neighbors (k=10) strategy
 -   Analyzes the cell type renaming strategy and unbiasedly extracts marker genes from the two species to valiate the integration
 -   Recreates PCA embeddings for the original human snRNA-seq dataset using the author's published steps
 -   Creates a series of computational pseudotime lineages starting from a progenitor population and moving through ductal or acinar progenitor, immature, and maturing cell types
 -   Maps the ferret genes to the human gene list using a curated ortholog file and subsets the two experiments to only use common genes
--   Runs fitGAM on the computational lineages to determine the genes most associated with the two ductal/acinar lineages for the two species
--   Calculates terminal lineage fates using CellRank and correlation scores of the most associates gene lists and compares them between the species
+-   Runs `fitGAM` on the computational lineages to determine the genes most associated with the two ductal/acinar lineages for the two species
+-   Calculates terminal lineage fates using `CellRank` and correlation scores of the most associates gene lists and compares them between the species
 -   Generates KEGG pathways highlighting ductal or acinar specific differentiation pathways that are shared between the species
 -   Creates all plots featured in the manuscript
 
 ## Repository Structure
-
-### `src`
-
-The directory in which all of the source scripts that were utilized in this analysis are located. Most files contain `_helpers.R` files that include a series of helper functions specific to that step, and there is also a `common_setup.R` function that is run prior to all of the R scripts to load in files, directories, and color palettes. Please find a more detailed explanation of each file within this directory.
 
 ### `figures`
 
@@ -40,3 +36,32 @@ The `rda` files that were generated from running the fitGAM function on the save
 ### `pseudotime_objects`
 
 The `csv` files containing lineage weights and pseudotime values that were generated using the same `Seurat` objects as well as the start and end clusters for the `fitGAM` calculations. These values were extracted from the calculated `slingshot` computational lineages, and saved along with the `Seurat` objects converted to `.h5ad` file format to move the analysis from R into an python environment. This was necessary as the downstream `CellRank` package does not have a dedicated R implementation, so everything needed to be ported over into a different IDE. The `h5Seurat` and `h5ad` files that were needed for the downsteam `12_cellrank_terminal_fates.py` and `13_correlation_scoring.py` scripts were not uploaded here to conserve space, but both can be easily regenerated by running the `11_save_for_cellrank.R` script.
+
+### `src`
+
+The directory in which all of the source scripts that were utilized in this analysis are located. Most files contain `_helpers.R` files that include a series of helper functions specific to that step, and there is also a `common_setup.R` function that is run prior to all of the R scripts to load in files, directories, and color palettes. Please find a more detailed explanation of each file within this directory.
+
+## Outputs
+
+### `figures`
+
+Output: A series of UMAPs, barplots, heatmaps, psuedotime computational lineage trajectories, CellRank terminal cell fate visualizations, and KEGG pathways detailing the integration, cell type validation, lineage drawing, and downstream validation of each of the steps in the pipeline.
+
+### `rds_objects`
+
+Output: All of the `Seurat` objects required to run each step in the sequence in `src`. Note that any of these scripts can be run in any preferred order, or all scripts can be run one after another to regenerate plots and downstream `Seurat` objects.
+
+## How to Run
+
+Each R script in the `src` directory can be run by simple language specific execution, either by `Rscript <##_analysis_step>.R` or `python3 <##_analysis_step>.py`.
+
+## Requirements
+
+[TODO: Add docker file and python installation requirements from workspace]
+
+## Data availability
+
+-   Sequencing data available at: [TODO: link]
+-   `Seurat` objects available at: [TODO: link]
+-   Published human `Seurat` object available at: [https://cells.ucsc.edu/?ds=human-fetal-panc]
+
