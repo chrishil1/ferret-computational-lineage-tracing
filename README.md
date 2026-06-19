@@ -65,6 +65,20 @@ The downstream pseudotime computational lineages require the original PCA embedd
 
 Similar to what was done in the integration step, all downstream gene regulatory program analysis needed to be done on the same set of genes per species. As a result, this script reads in our two species objects and maps the ferret genes to the human orthologs where an entry was available. The human dataset requires the Ensembl ID's to be converted into their gene symbols as well to match the ferret dataset and it's newly converted names, so a `biomaRt` instance is created and converted before standard normalization and scaling processing steps was performed on the two datasets. Finally, the two gene lists from the specis are intersected, and only the genes present in kept in the two `Seurat` objects. These genes will also be the complete set of genes serving as the background for the eventual KEGG analysis, so we save those to a `csv` file for later.
 
+#### `06_celltype_validation.R`
+
+After the ferret dataset has been renamed and the two `Seurat` objects have been subset to include common genes, we investigate celltype specific gene expression to see if it is comparable between the species. To do so, the datasets are loaded in and marker genes are calculated per cell type via `FindAllMarkers`. The genes that result are ranked by `abs(avg_log2FC)`, and a large enough sample size (n = 2000) is taken from both species in order to get 100 shared genes that are have high log2FC values in the two species. Expression data is extracted for these gene sets using our helper differential expression heatmap function, and only genes that have scaled Z-score expression values > 2 in the ferret and human datasets are extracted. This final gene list is plotting once more with the DE heatmap helper and cell type specific marker genes can be observed as unbiasedly pulled out and specific to the cell type we would expect.
+
+The helper `.R` function contains this validation differential expression heatmap function that is synonymous with the DE heatmap function from earlier analysis steps but contains overflow prevention that can occur in this step.
+
+#### `07_save_for_fitgam.R`
+
+In order to run `fitGAM` on the identified pseudotime slingshot trajectories, the `Seurat` objects and corresponding `SingleCellExperiment` objects that are calculated from `slingshot` need to be saved to be input into the function correctly. To do so, our `run_slingshot_subset` function is written to take in a `Seurat` object, the name of it's clusters (`seurat_clusters` or `Leiden_cluster`), and the start/end clusters. The `slingshot` function is run with the first 15 PCs in the `Seurat` object embedding, and the `SingleCellExperiment` and `Seurat` object subset to just these clusters of interest are saved to `.rds` files for the next step of actually performing `fitGAM`.
+
+#### `08_run_fitgam.R`
+
+With the files saved, we can now utilize the functions from the `tradeSeq` R package to identify genes associated with the pseudotime lineages in the two species. To do so, our `run_tradeseq_pipeline` function reads in 
+
 ## Outputs
 
 ### `figures`
