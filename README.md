@@ -61,7 +61,17 @@ Output: All of the `Seurat` objects required to run each step in the sequence in
 
 ## How to Run
 
-Each R script in the `src` directory can be run by simple language specific execution, either by `Rscript <##_analysis_step>.R` or `python3 <##_analysis_step>.py`. The can be run using the Seurat `.rds` files from [TODO: link], and can be executed in order, out of order, or independently since all intermediate Seurat objects exist in this workspace.
+Each script in the `src` directory can be run by simple language specific execution, either by `Rscript <##_analysis_step>.R` or `python3 <##_analysis_step>.py`.
+
+Depending on your platform, you can execute this directory with the docker image or convert the tarball into a singularity image and execute it on an HPC, either through:
+-   `docker exec -it Rscript <##_analysis_step>.R` or
+-   `singularity exec ferret_integration_project.sif Rscript <##_analysis_step>.R`
+
+They can be run using the Seurat `.rds` files from [TODO: link], and can be executed in order, out of order, or independently since all intermediate Seurat objects exist in this workspace.
+
+Two external files are required:
+-   The human comparison `All cells` snRNA-seq dataset from [Migliorini et al. 2024](https://pubmed.ncbi.nlm.nih.gov/39406230/): [All cells dataset](https://cells.ucsc.edu/?ds=human-fetal-panc)
+-   The species mapping file to map ferret gene names to human orthologs from [Yuan et al.](https://www.nature.com/articles/s41586-023-06549-9): [Supplementary Table 10](https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-023-06549-9/MediaObjects/41586_2023_6549_MOESM14_ESM.xlsx)
 
 ## Requirements
 
@@ -90,4 +100,3 @@ The two python steps `12_cellrank_terminal_fates.py` and `13_correlation_scoring
 
 -   Sequencing data available at: [TODO: link]
 -   `Seurat` objects available at: [TODO: link]
--   Published human `Seurat` object available at: [https://cells.ucsc.edu/?ds=human-fetal-panc]
