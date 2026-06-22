@@ -25,6 +25,14 @@ This repository provides a complete pipeline for the ferret-human scRNA-seq/snRN
 
 ## Repository Structure
 
+### `csv_files`
+
+The final `.csv` data files that are generated through this analysis pipeline, which include scaled and raw gene correlation scores created by `CellRank`, marker genes by population of either `day` or `final_renamed_celltype` for the ferret dataset that are found through the `Seurat` `FindAllMarkers` function, background genes that are used in the KEGG analysis, or Z-scored gene expression data for the ferret and human datasets which resulted from the cell type validation investigation.
+
+### `docker`
+
+The files required to generate the final Docker container which is found at [TODO: link]. Included in this repostitory is the `R_dependencies.R` file that contains all of the libraries in R v4.4.2 that are required to run this pipeline, the `environment.yaml` configuration file for the anaconda instance and python v3.12.3 packages, the `renv.lock` file that has captures the snapshot of the library when this pipeline was built, and the `Dockerfile` that specifies how this image should be created. Note that this image was created on an arm64 machine using bioconductor docker release 3.20.
+
 ### `figures`
 
 All of the figures generated from this analysis pipeline and included in the final manuscript are housed in this location. The prefixed number for each figure corresponds to the scripts in `src` that was used to create the plot.
