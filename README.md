@@ -47,7 +47,9 @@ The `csv` files containing lineage weights and pseudotime values that were gener
 
 ### `src`
 
-The directory in which all of the source scripts that were utilized in this analysis are located. Most files contain `_helpers.R` files that include a series of helper functions specific to that step, and there is also a `common_setup.R` function that is run prior to all of the R scripts to load in files, directories, and color palettes. Please find the README.md file within the `src` directory for more details on each of these files.
+The directory in which all of the source scripts that were utilized in this analysis are located. Most files contain `_helpers.R` files that include a series of helper functions specific to that step, and there is also a `common_setup.R` function that is run prior to all of the R scripts to load in files, directories, and color palettes.
+
+Please find the README.md file within the `src` directory for more details on each of these files.
 
 ## Outputs
 
