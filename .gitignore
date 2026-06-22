@@ -2,11 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rprofile
 *.DS_Store
 *.Rproj
 *.rds
-plots/
-*.html
 *.h5ad
 *.h5Seurat
+*.tar.gz
+renv/
 species_mapping_file.csv
