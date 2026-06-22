@@ -121,11 +121,23 @@ Each R script in the `src` directory can be run by simple language specific exec
 
 ## Requirements
 
-[TODO: Add docker file and python installation requirements from workspace]
+### Python Requirements
+
+The two python steps `12_cellrank_terminal_fates.py` and `13_correlation_scoring.py` were run with:
+
+-   Python Version 3.12.3
+-   `cellrank` v2.0.6
+-   `matplotlib` v3.9.0
+-   `numpy` v1.26.4
+-   `pandas` v2.2.2
+-   `scanpy` v1.10.4
+-   `seaborn` v0.13.2
+
+
+[TODO: Add docker file from workspace]
 
 ## Data availability
 
 -   Sequencing data available at: [TODO: link]
 -   `Seurat` objects available at: [TODO: link]
 -   Published human `Seurat` object available at: [https://cells.ucsc.edu/?ds=human-fetal-panc]
-
