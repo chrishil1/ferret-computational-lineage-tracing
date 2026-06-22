@@ -5,7 +5,6 @@
 *.DS_Store
 *.Rproj
 *.rds
-TODOs.md
 plots/
 *.html
 *.h5ad

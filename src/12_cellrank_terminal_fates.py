@@ -485,9 +485,6 @@ def ferret_ductal():
         vmax="p96",
         save="_ductal_immature_1_driver_genes_ferret_ductal.pdf",
     )
-    ductal_immature_1_df.to_csv(
-        "csv_files/ductal_immature_1_driver_genes_ferret.csv", index=True
-    )
 
     # Calculate lineage drivers with ductal immature_2 as the terminal state
     ductal_immature_2_df = g.compute_lineage_drivers(
@@ -509,9 +506,6 @@ def ferret_ductal():
         ncols=3,
         vmax="p96",
         save="_ductal_immature_2_driver_genes_ferret_ductal.pdf",
-    )
-    ductal_immature_2_df.to_csv(
-        "csv_files/ductal_immature_2_driver_genes_ferret.csv", index=True
     )
 
     # Calculate lineage drivers with acinar proliferating as the terminal state
@@ -1034,9 +1028,6 @@ def human_ductal():
         ncols=3,
         vmax="p96",
         save="_ductal_immature_2_driver_genes_human_ductal.pdf",
-    )
-    ducto_immature_2_df.to_csv(
-        "csv_files/ductal_immature_2_driver_genes_human.csv", index=True
     )
 
     # Calculate lineage drivers with pancreatic progenitor_1 as terminal state
