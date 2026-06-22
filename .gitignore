@@ -9,4 +9,4 @@ plots/
 *.html
 *.h5ad
 *.h5Seurat
-csv_files
+species_mapping_file.csv
