@@ -117,24 +117,30 @@ Output: All of the `Seurat` objects required to run each step in the sequence in
 
 ## How to Run
 
-Each R script in the `src` directory can be run by simple language specific execution, either by `Rscript <##_analysis_step>.R` or `python3 <##_analysis_step>.py`.
+Each R script in the `src` directory can be run by simple language specific execution, either by `Rscript <##_analysis_step>.R` or `python3 <##_analysis_step>.py`. The can be run using the Seurat `.rds` files from [TODO: link], and can be executed in order, out of order, or independently since all intermediate Seurat objects exist in this workspace.
 
 ## Requirements
 
+All python and R packages can be loaded and installed with the associated docker image, found here: [TODO: link]
+
+### R requirements
+
+This pipeline was run with R v4.4.2.
+
+The packages required to run steps 1-11 and 14 can be found within `docker/R_dependencies.R`, and are all packaged within the docker image.
+
 ### Python Requirements
+
+This pipeline was run with python v3.12.3.
 
 The two python steps `12_cellrank_terminal_fates.py` and `13_correlation_scoring.py` were run with:
 
--   Python Version 3.12.3
 -   `cellrank` v2.0.6
 -   `matplotlib` v3.9.0
 -   `numpy` v1.26.4
 -   `pandas` v2.2.2
 -   `scanpy` v1.10.4
 -   `seaborn` v0.13.2
-
-
-[TODO: Add docker file from workspace]
 
 ## Data availability
 
