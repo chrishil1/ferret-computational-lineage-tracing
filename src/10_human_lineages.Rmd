@@ -1,7 +1,6 @@
 ---
 title: "Slingshot analysis of remade human dataset"
 date: "`r Sys.Date()`"
-author: "Chris Hill"
 output: html_document
 ---
 
