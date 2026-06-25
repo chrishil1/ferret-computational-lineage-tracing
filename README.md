@@ -90,13 +90,17 @@ Please find the `README.md` file within the `src` directory for more details on 
 
 ## Outputs
 
-### `figures`
-
-Output: A series of UMAPs, barplots, heatmaps, psuedotime computational lineage trajectories, CellRank terminal cell fate visualizations, and KEGG pathways detailing the integration, cell type validation, lineage drawing, and downstream validation of each of the steps in the pipeline.
-
 ### `rds_objects`
 
 Output: All of the `Seurat` objects required to run each step in the sequence in `src`. Note that any of these scripts can be run in any preferred order, or all scripts can be run one after another to regenerate plots and downstream `Seurat` objects.
+
+### `csv_files`
+
+The data files generated through this analysis pipeline, which include scaled and raw gene correlation scores created by `CellRank`, marker genes by population of either `day` or `final_renamed_celltype` for the ferret dataset that are found through the `Seurat` `FindAllMarkers` function, background genes that are used in the KEGG analysis, or Z-scored gene expression data for the ferret and human datasets which resulted from the cell type validation investigation.
+
+### `figures`
+
+Output: A series of UMAPs, barplots, heatmaps, psuedotime computational lineage trajectories, CellRank terminal cell fate visualizations, and KEGG pathways detailing the integration, cell type validation, lineage drawing, and downstream validation of each of the steps in the pipeline.
 
 ## Data availability
 
