@@ -23,6 +23,43 @@ This repository provides a complete pipeline for the ferret-human scRNA-seq/snRN
 -   Generates KEGG pathways highlighting ductal or acinar specific differentiation pathways that are shared between the species
 -   Creates all plots featured in the manuscript
 
+## Requirements
+
+All python and R packages can be loaded and installed with the associated docker image, found here: [TODO: link]
+
+### R requirements
+
+This pipeline was run with R v4.4.2.
+
+The packages required to run steps 1-11 and 14 can be found within `docker/R_dependencies.R`, and are all packaged within the docker image.
+
+### Python Requirements
+
+This pipeline was run with python v3.12.3.
+
+The two python steps `12_cellrank_terminal_fates.py` and `13_correlation_scoring.py` were run with:
+
+-   `cellrank` v2.0.6
+-   `matplotlib` v3.9.0
+-   `numpy` v1.26.4
+-   `pandas` v2.2.2
+-   `scanpy` v1.10.4
+-   `seaborn` v0.13.2
+
+## How to Run
+
+Each script in the `src` directory can be run by simple language specific execution, either by `Rscript <##_analysis_step>.R` or `python3 <##_analysis_step>.py`.
+
+Depending on your platform, you can execute this directory with the docker image or convert the tarball into a singularity image and execute it on an HPC, either through:
+-   `docker exec -it Rscript <##_analysis_step>.R` or
+-   `singularity exec ferret_integration_project.sif Rscript <##_analysis_step>.R`
+
+They can be run using the Seurat `.rds` files from [TODO: link], and can be executed in order, out of order, or independently since all intermediate Seurat objects exist in this workspace.
+
+Two external files are required:
+-   The human comparison `All cells` snRNA-seq dataset from [Migliorini et al. 2024](https://pubmed.ncbi.nlm.nih.gov/39406230/): [All cells dataset](https://cells.ucsc.edu/?ds=human-fetal-panc)
+-   The species mapping file to map ferret gene names to human orthologs from [Yuan et al.](https://www.nature.com/articles/s41586-023-06549-9): [Supplementary Table 10](https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-023-06549-9/MediaObjects/41586_2023_6549_MOESM14_ESM.xlsx)
+
 ## Repository Structure
 
 ### `csv_files`
@@ -60,43 +97,6 @@ Output: A series of UMAPs, barplots, heatmaps, psuedotime computational lineage 
 ### `rds_objects`
 
 Output: All of the `Seurat` objects required to run each step in the sequence in `src`. Note that any of these scripts can be run in any preferred order, or all scripts can be run one after another to regenerate plots and downstream `Seurat` objects.
-
-## How to Run
-
-Each script in the `src` directory can be run by simple language specific execution, either by `Rscript <##_analysis_step>.R` or `python3 <##_analysis_step>.py`.
-
-Depending on your platform, you can execute this directory with the docker image or convert the tarball into a singularity image and execute it on an HPC, either through:
--   `docker exec -it Rscript <##_analysis_step>.R` or
--   `singularity exec ferret_integration_project.sif Rscript <##_analysis_step>.R`
-
-They can be run using the Seurat `.rds` files from [TODO: link], and can be executed in order, out of order, or independently since all intermediate Seurat objects exist in this workspace.
-
-Two external files are required:
--   The human comparison `All cells` snRNA-seq dataset from [Migliorini et al. 2024](https://pubmed.ncbi.nlm.nih.gov/39406230/): [All cells dataset](https://cells.ucsc.edu/?ds=human-fetal-panc)
--   The species mapping file to map ferret gene names to human orthologs from [Yuan et al.](https://www.nature.com/articles/s41586-023-06549-9): [Supplementary Table 10](https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-023-06549-9/MediaObjects/41586_2023_6549_MOESM14_ESM.xlsx)
-
-## Requirements
-
-All python and R packages can be loaded and installed with the associated docker image, found here: [TODO: link]
-
-### R requirements
-
-This pipeline was run with R v4.4.2.
-
-The packages required to run steps 1-11 and 14 can be found within `docker/R_dependencies.R`, and are all packaged within the docker image.
-
-### Python Requirements
-
-This pipeline was run with python v3.12.3.
-
-The two python steps `12_cellrank_terminal_fates.py` and `13_correlation_scoring.py` were run with:
-
--   `cellrank` v2.0.6
--   `matplotlib` v3.9.0
--   `numpy` v1.26.4
--   `pandas` v2.2.2
--   `scanpy` v1.10.4
--   `seaborn` v0.13.2
 
 ## Data availability
 
