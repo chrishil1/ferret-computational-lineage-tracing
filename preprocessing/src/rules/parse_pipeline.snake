@@ -1,0 +1,82 @@
+# ===== Snakemake rules for running the Parse bioscience pipeline ===============
+# Tutorial: https://support.parsebiosciences.com/hc/en-us/articles/17166220335636
+
+def _get_fastq(wildcards):
+    fastq_file = FASTQ_DICT[wildcards.library]
+    return(fastq_file)
+
+def _get_samples(wildcards):
+    samples = LIBRARY_DICT[wildcards.library]
+    well_list = []
+    for i in samples:
+        well_information = "--sample " + i + " " + WELL_DICT[i]
+        well_list.append(well_information)
+    return_info = " ".join(well_list)
+    return(return_info)
+
+def _get_sublibraries(wildcards):
+    library_info = combine_dict[wildcards.group]
+    full_library_info = [os.path.join(wildcards.results, i) for i in library_info]
+    full_library_info = [os.path.abspath(i) for i in full_library_info]
+    return(full_library_info)
+
+# Run parse biosciences pipeline =========================================================
+
+rule parse_single:
+    output:
+        "{results}/{library}/{library}_count_done.txt"
+    params:
+        job_name   = "count",
+        memory     = "select[mem>100] rusage[mem=100]",
+        genome     = GENOME,
+        fastq      = _get_fastq,
+        chemistry  = CHEMISTRY,
+        sample     = _get_samples,
+        output_dir = "{results}/{library}"
+    log:
+        "{results}/logs/parse_single/{library}_count"
+    threads:
+        32
+    shell:
+        """
+        split-pipe \
+            --mode all \
+            --chemistry {params.chemistry} \
+            --genome_dir {params.genome} \
+            --fq1 {params.fastq} \
+            --output_dir {params.output_dir} \
+            --nthreads 32 \
+            {params.sample}
+
+        touch {output}
+        """
+
+
+rule parse_combine:
+    input:
+        expand(
+            "{{results}}/{library}/{library}_count_done.txt",
+                library = libraries
+            )
+    output:
+        "{results}/combined_group_{group}/{group}_combined_done.txt"
+    params:
+        job_name     = "combine",
+        memory       = "select[mem>100] rusage[mem=100]",
+        sublibraries = _get_sublibraries,
+        output_dir   = "{results}/combined_group_{group}"
+    log:
+        "{results}/logs/parse_combine/{group}_combine"
+    threads:
+        32
+    shell:
+        """
+        split-pipe \
+            --mode combine \
+            --output_dir {params.output_dir} \
+            --nthreads 32 \
+            --sublibraries {params.sublibraries}
+
+        touch {output}
+        """
+   

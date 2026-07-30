@@ -1,0 +1,15 @@
+.*
+!.gitignore
+!.gitattributes
+results
+raw_data
+library*
+logs
+.Rproj.user
+files/species_mapping_file.csv
+*.tar
+*.sif
+*.zip
+*.pdf
+*.html
+*.rmd

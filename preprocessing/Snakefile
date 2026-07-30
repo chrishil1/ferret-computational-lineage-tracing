@@ -1,0 +1,195 @@
+""" Snake pipeline for running Parse split-seq """
+
+# This has been borrowed and modified from pipelines written by Ryan Sheridan
+
+# Configure shell for all rules 
+shell.executable("/bin/bash")
+shell.prefix("set -o nounset -o pipefail -o errexit -x; ")
+import subprocess
+import glob
+import os 
+import re
+import pandas as pd
+from collections import defaultdict
+
+
+
+# Parameters from config.yaml
+SAMPLE_SHEET   = config["SAMPLE_SHEET"]
+RESULTS        = config["RESULTS"]
+GENOME         = config["GENOME"]
+MAX_JOBS       = config["MAX_JOBS"]
+CHEMISTRY      = config["CHEMISTRY"]
+SCRIPT_PATH     = config["SCRIPT_PATH"]
+SCRIPTS_RUN     = config["SCRIPTS_RUN"]
+SAMPLE_SCRIPTS  = config["SAMPLE_SCRIPTS"]
+MERGE_SCRIPTS   = config["MERGE_SCRIPTS"]
+SUBSET_SCRIPTS  = config["SUBSET_SCRIPTS"]
+SAMPLE_INFO     = config["SAMPLE_INFO"]
+
+
+
+# Function to check paths for input files/directories
+def _check_path(path):
+    if os.path.exists(path):
+        return os.path.abspath(path)
+    else:
+        sys.exit("ERROR: " + path + " does not exist.")
+
+if not os.path.exists(RESULTS):
+    os.makedirs(RESULTS)
+RESULTS = _check_path(RESULTS)
+GENOME  = _check_path(GENOME)
+
+SAMPLE_LIST = pd.read_table(SAMPLE_SHEET).set_index("sample_name", drop = False)
+SAMPLES = SAMPLE_LIST.index.values
+
+SAMPLE_INFO_FILE = pd.read_table(SAMPLE_INFO).set_index("sample", drop = False)
+
+# Subset to the individual files
+SAMPLE_INFO_FILE = SAMPLE_INFO_FILE[SAMPLE_INFO_FILE["merged"] == False]
+
+SAMPLES_RUN = SAMPLE_INFO_FILE.index.values
+
+
+FASTQ_FILES = SAMPLE_LIST["fastq_files"]
+RAW_DATA = SAMPLE_LIST["data_dir"]
+LIBRARIES = SAMPLE_LIST["library_name"]
+WELLS = SAMPLE_LIST["sample_wells"]
+
+# Make a dictionary of all samples and their associated fastq file
+SAMPLE_DICT = dict(zip(SAMPLES, FASTQ_FILES))
+DIR_DICT = dict(zip(SAMPLES, RAW_DATA))
+LIB_DICT = dict(zip(SAMPLES, LIBRARIES))
+
+# Make a dictionary with the full path to the fastq files
+FASTQ_DICT = defaultdict(str)
+LIBRARY_DICT = defaultdict(list)
+
+# Set up fastq information
+for sample in SAMPLE_DICT:
+
+    # Pull out fastq files, raw data paths, and library names
+    fastq_files = SAMPLE_DICT[sample].split(",")
+    data_dirs = DIR_DICT[sample].split(",")
+    libraries = LIB_DICT[sample].split(",")
+
+    for i in range(0, len(fastq_files)):
+        if len(libraries) != len(fastq_files):
+            sys.exit("Problem with sample sheet. library_name must be same length as fastq_files")
+        # Append full path of fastq files
+        if len(data_dirs) == len(fastq_files):
+            full_fastq = os.path.join(data_dirs[i], fastq_files[i])
+        elif len(data_dirs) == 1:
+            full_fastq = os.path.join(data_dirs[0], fastq_files[i])
+        else:
+            sys.exit("Problem with sample sheet. Data dir list must be 1 or the same length as the fastq list")
+        full_fastq = _check_path(full_fastq)
+
+        # Pull out library
+        library = libraries[i]
+
+        # Make a dictionary of libraries and their associated fastq file
+        if len(FASTQ_DICT[library]) > 0 and FASTQ_DICT[library] != full_fastq:
+            sys.exit("Problem with sample sheet. All specified libraries must relate to unique fastq files")
+        FASTQ_DICT[library] = full_fastq
+
+        # Make a dictionary of libraries and their assocaited samples
+        LIBRARY_DICT[library].append(sample)
+
+# Set up sample well information
+WELL_DICT = dict(zip(SAMPLES, WELLS))
+
+# Decide what libraries to combine
+combine_libraries = []
+for sample in LIB_DICT:
+    libraries = LIB_DICT[sample].split(",")
+    if libraries not in combine_libraries and len(libraries) > 1:
+        combine_libraries.append(libraries)
+
+combine_dict = {}
+for i in range(0,len(combine_libraries)):
+    combine_dict[str(i+1)] = combine_libraries[i]
+
+if SCRIPTS_RUN:
+    # Get R script info
+    # All script names is the keys of scripts run
+    script_name_dict = {i:"all_scripts" for i in SCRIPTS_RUN.keys()}
+
+
+    # Create script dict where all scripts is all the scripts_run scripts
+    script_dict = {"all_scripts": SCRIPTS_RUN}
+else:
+    script_dict = {}
+    script_name_dict = {}
+
+if SAMPLE_SCRIPTS:
+    if SAMPLE_SCRIPTS["samples"] == "all":
+
+        SAMPLE_SCRIPTS["samples"] = SAMPLES_RUN
+    for sample_name in SAMPLE_SCRIPTS["samples"]:
+        individual_dict = OrderedDict()
+        for script in SAMPLE_SCRIPTS["scripts_run"]:
+            # Get key and value information
+            dict_key = sample_name + "__" + script
+            dict_key = re.sub('\\.R', '', dict_key)
+            dict_value = os.path.join("indiviual_analysis", script)
+            # Add to an individual dict
+            individual_dict[dict_key] = dict_value
+            # Add the script name to all names
+            script_name_dict[dict_key] = sample_name
+        # Add new dict to the script dict under the sample name as the key
+        script_dict[sample_name] = individual_dict
+
+
+
+if MERGE_SCRIPTS:
+    if MERGE_SCRIPTS["samples"] == "all":
+        MERGE_SCRIPTS["samples"] = SAMPLES_RUN
+    merged_dict = OrderedDict()
+    for script in MERGE_SCRIPTS["scripts_run"]:
+        dict_key = "merged__" + script
+        dict_key = re.sub('\\.R', '', dict_key)
+        dict_value = os.path.join("integrated_analysis", script)
+        merged_dict[dict_key] = dict_value
+        script_name_dict[dict_key] = "merged"
+    script_dict["merged"] = merged_dict
+
+
+if SUBSET_SCRIPTS:
+    for subset_type in SUBSET_SCRIPTS["subsets"]:
+        print(subset_type)
+        individual_dict = OrderedDict()
+        for script in SUBSET_SCRIPTS["scripts_run"]:
+            # Get key and value information
+            dict_key = subset_type + "__" + script
+            dict_key = re.sub('\\.R', '', dict_key)
+            dict_value = os.path.join("integrated_analysis", script)
+            # Add to an individual dict
+            individual_dict[dict_key] = dict_value
+            # Add the script name to all names
+            script_name_dict[dict_key] = subset_type
+        # Add new dict to the script dict under the sample name as the key
+        script_dict[subset_type] = individual_dict
+else:
+    SUBSET_SCRIPTS = {"subsets": "none"}
+
+
+# Final output files
+rule all:
+    input:
+        expand(
+            "{results}/{library}/{library}_count_done.txt",
+            results = RESULTS, library = libraries
+            ),
+        expand(
+            "{results}/combined_group_{group}/{group}_combined_done.txt",
+            results = RESULTS, group = combine_dict.keys()
+            ),
+        expand(
+            "{results}/run_scripts/{sample}_run.txt",
+            sample = script_name_dict.keys(), results = RESULTS
+            )
+
+include: "src/rules/parse_pipeline.snake"
+include: "src/rules/run_rscripts.snake"
