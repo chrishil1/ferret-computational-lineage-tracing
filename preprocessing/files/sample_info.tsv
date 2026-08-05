@@ -1,0 +1,5 @@
+sample	merged	HTO	ADT	hash_ident	adt_pca	adt_umap	PCs	resolution	batch_correction
+combined_group_1	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	35	0.8	
+combined_group_2	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	35	1.2
+merged	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	35	1.2	none
+pancreas	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	35	1	none

@@ -1,0 +1,91 @@
+# ==== Config file for running the Parse biosciences pipeline ====================
+
+# Path to the sheet including sample information. An example sheet is found in "files"
+# and a README explains how to create the sheet
+SAMPLE_SHEET:
+    "files/samples.tsv"
+
+# Path to the output directory.
+RESULTS:
+    "results"
+
+# Path to the Cell Ranger genome reference.
+GENOME:
+    "/beevol/home/wellskri/Analysis/ref/parse_biosciences/ASM1176430v1.1"
+
+# What chemistry was used, v1 or v2
+CHEMISTRY:
+    v2
+
+# Maximum number of jobs per sample that can be submitted by Cell Ranger
+# at a time.
+MAX_JOBS:
+    24
+
+
+# =============================================================================== #
+
+# Config for running R scripts
+SCRIPT_PATH:
+    "src/scripts"
+
+# Path to all scripts to run, put these in the order you want them run.
+SCRIPTS_RUN:
+
+
+# If the exact same scripts will be run for multiple samples, put them
+# here. This is a dictionary with sample and scripts_run as keys.
+# Within a sample, the scripts will be run in order, otherwise the
+# scripts will be run in parallel. Set to "all" if you want to run
+# on all samples
+SAMPLE_SCRIPTS:
+    samples:
+        "all"
+    scripts_run:
+        - "01_Initial_processing.R"
+        - "02_remove_doublets.R"
+        - "03_PCA.R"
+        - "04a_UMAP_find_resolution.R"
+        - "04b_UMAP.R"
+        - "05_name_clusters.R"
+        - "06_find_markers.R"
+
+
+# If merging all samples, put the scripts to process them below. Under
+# samples include what samples should be merged. If merging all samples,
+# set to "all"
+MERGE_SCRIPTS:
+    samples:
+        "all"
+    scripts_run:
+        - "01_Initial_processing.R"
+        - "02_PCA.R"
+        - "03_batch_correction.R"
+        - "04a_UMAP_find_resolution.R"
+        - "04b_UMAP.R"
+        - "05_name_clusters.R"
+        - "06_find_markers.R"
+        - "07_subset_cells.R"
+
+# This assumes that you will run scripts in the same directory as MERGE_SCRIPTS
+# because likely the scripts will be similar
+SUBSET_SCRIPTS:
+    subsets:
+        - "pancreas"
+    scripts_run:
+        - "02_PCA.R"
+        - "03_batch_correction.R"
+        - "04a_UMAP_find_resolution.R"
+        - "04b_UMAP.R"
+        - "05_name_clusters.R"
+        - "08_subset_markers.R"
+
+# Path to the sample info sheet. This contains the information about if the
+# sample has HTOs and ADTs. It is also where you will add in information
+# about the number of dimensions and resoultion. See files/sample_info.tsv
+# for an example.
+SAMPLE_INFO:
+    "files/sample_info.tsv"
+
+RSCRIPT_CONTAINER:
+    "docker/single_cell.sif"

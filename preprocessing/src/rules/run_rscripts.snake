@@ -1,0 +1,69 @@
+def _get_input(wildcards):
+	return_list = []
+
+	# First figure out where in the dict it should be
+	key_value = script_name_dict[wildcards.sample]
+	script_names = script_dict[key_value].keys()
+
+	if key_value == "merged":
+		# If merged, first add all scripts associated with the samples being merged
+		for sample_name in MERGE_SCRIPTS["samples"]:
+			sample_scripts = script_dict[sample_name].keys()
+			for i in sample_scripts:
+				input_file = os.path.join(wildcards.results, "run_scripts", i + "_run.txt")
+				return_list.append(input_file)
+
+	elif key_value in SUBSET_SCRIPTS["subsets"]:
+		sample_scripts = script_dict["merged"]
+		for i in sample_scripts:
+			input_file = os.path.join(wildcards.results, "run_scripts", i + "_run.txt")
+			return_list.append(input_file)
+
+	# Add scripts in order for the given sample, return once you hit the script you
+	# are currently on.
+	for i in script_names:
+	    if i == wildcards.sample:
+	    	return(return_list)
+	    else:
+	    	input_file = os.path.join(wildcards.results, "run_scripts", i + "_run.txt")
+	    	return_list.append(input_file) 
+
+
+def _get_scripts(wildcards):
+	key_value = script_name_dict[wildcards.sample]
+	script_name = script_dict[key_value][wildcards.sample]
+
+	full_script_path=os.path.join(SCRIPT_PATH, script_name)
+	_check_path(full_script_path)
+	return(full_script_path)
+
+# Add in one rule that makes sure all cellranger is done. That output goes
+# into the return list.
+
+rule run_rscript:
+	input:
+		_get_input
+	output:
+		"{results}/run_scripts/{sample}_run.txt"
+	params:
+		job_name        = "{sample}_run_rscript",
+		memory          = "select[mem>200] rusage[mem=200]",
+		scripts         = _get_scripts,
+		sample_info     = SAMPLE_INFO
+	singularity:
+		config["RSCRIPT_CONTAINER"]
+	log:
+		"{results}/logs/rscript/rscript_{sample}"
+	threads:
+		1
+	shell:
+		"""
+		Rscript --vanilla {params.scripts} \
+			{wildcards.sample} \
+			{wildcards.results} \
+			{params.sample_info}
+			
+		echo "Finished rscript" > {output}
+		"""
+
+
