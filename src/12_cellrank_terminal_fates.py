@@ -57,8 +57,8 @@ def ferret_acinar():
     gene tables to disk.
 
     Reads:
-        pseudotime_objects/ferret_acinar_s9e10_pseudotime.csv
-        pseudotime_objects/ferret_acinar_s9e10_lineage_weights.csv
+        pseudotime_objects/ferret_acinar_s26e19_pseudotime.csv
+        pseudotime_objects/ferret_acinar_s26e19_lineage_weights.csv
         pseudotime_objects/ferret_acinar.h5ad
 
     Writes:
@@ -76,18 +76,18 @@ def ferret_acinar():
 
     # Load in pseudotime and weights for this specific acinar lineage
     ferret_acinar_pseudotime = pd.read_csv(
-        "pseudotime_objects/ferret_acinar_s9e10_pseudotime.csv", index_col=0
+        "pseudotime_objects/ferret_acinar_s26e19_pseudotime.csv", index_col=0
     )
     ferret_acinar_weights = pd.read_csv(
-        "pseudotime_objects/ferret_acinar_s9e10_lineage_weights.csv", index_col=0
+        "pseudotime_objects/ferret_acinar_s26e19_lineage_weights.csv", index_col=0
     )
 
     # Load in the h5ad file from the ferret Seurat object
     adata_ferret_acinar = sc.read_h5ad("pseudotime_objects/ferret_acinar.h5ad")
 
     # Specify that we are looking at lineage 2 for this slingshot pseudotime
-    adata_ferret_acinar.obs["pseudotime"] = ferret_acinar_pseudotime["Lineage2"]
-    adata_ferret_acinar.obs["weights"] = ferret_acinar_weights["Lineage2"]
+    adata_ferret_acinar.obs["pseudotime"] = ferret_acinar_pseudotime["Lineage3"]
+    adata_ferret_acinar.obs["weights"] = ferret_acinar_weights["Lineage3"]
 
     # Remove any NaNs, recategorize the majority celltype as a category
     adata_ferret_acinar = adata_ferret_acinar[
@@ -116,16 +116,15 @@ def ferret_acinar():
 
     # Instantiate the GPCCA esimator and fit to the clusters using celltype
     g = cr.estimators.GPCCA(pk)
-    g.fit(cluster_key="final_renamed_celltype", n_states=5)
+    g.fit(cluster_key="final_renamed_celltype", n_states=4)
 
     # Manually set the terminal states after fit, calculate fate probabilities
     g.set_terminal_states(
         states=[
-            "Acinar Proliferating",
-            "Acinar Maturing",
-            "Ductal Immature",
-            "Pancreatic Progenitor",
-            "Endothelial Lymphatic",
+            'Pancreatic Progenitor',
+            'Endothelial Lymphatic',
+            'Acinar Immature',
+            'Acinar Proliferating'
         ]
     )
     g.compute_fate_probabilities()
@@ -158,67 +157,34 @@ def ferret_acinar():
         "Acinar Proliferating",
         "Acinar Immature",
         "Acinar Maturing",
+        "B lymphocyte",
+        "Beta",
         "Ductal Immature",
         "Endothelial Lymphatic",
-        "Ductal Proliferating",
-        "Pancreatic Progenitor",
-        "Acinar Progenitor",
-        "Alpha",
         "Mesenchyme Subtype 1",
-        "B lymphocyte",
+        "Pancreatic Progenitor",
     ]
 
-    # Calculate lineage drivers with ductal immature as the terminal state
-    ductal_immature_df = g.compute_lineage_drivers(
-        lineages=["Ductal Immature"],
+    # Calculate lineage drivers with acinar immature as the terminal state
+    acinar_immature_df = g.compute_lineage_drivers(
+        lineages=["Acinar Immature"],
         cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
-    adata_ferret_acinar.obs["fate_probabilities_ductal_immature"] = (
-        g.fate_probabilities["Ductal Immature"].X.flatten()
+    adata_ferret_acinar.obs["fate_probabilities_acinar_immature"] = (
+        g.fate_probabilities["Acinar Immature"].X.flatten()
     )
     # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_acinar,
         basis="umap",
-        color=["fate_probabilities_ductal_immature"]
-        + list(ductal_immature_df.index[:8]),
+        color=["fate_probabilities_acinar_immature"]
+        + list(acinar_immature_df.index[:8]),
         color_map="viridis",
         s=50,
         ncols=3,
         vmax="p96",
-        save="_ductal_immature_driver_genes_ferret_acinar.pdf",
-    )
-
-    # Calculate lineage drivers with acinar maturing as the terminal state
-    acinar_mat_df = g.compute_lineage_drivers(
-        lineages=["Acinar Maturing"],
-        cluster_key="final_renamed_celltype",
-        clusters=[
-            "Acinar Proliferating",
-            "Acinar Immature",
-            "Acinar Maturing",
-            "Endothelial Lymphatic",
-            "Pancreatic Progenitor",
-            "Acinar Progenitor",
-        ],
-    )
-    adata_ferret_acinar.obs["fate_probabilities_acinar_maturing"] = (
-        g.fate_probabilities["Acinar Maturing"].X.flatten()
-    )
-    # Plot the top 8 genes associated with the pathway next to the fate plot
-    sc.pl.embedding(
-        adata_ferret_acinar,
-        basis="umap",
-        color=["fate_probabilities_acinar_maturing"] + list(acinar_mat_df.index[:8]),
-        color_map="viridis",
-        s=50,
-        ncols=3,
-        vmax="p96",
-        save="_acinar_maturing_driver_genes_ferret_acinar.pdf",
-    )
-    acinar_mat_df.to_csv(
-        "csv_files/acinar_maturing_driver_genes_ferret.csv", index=True
+        save="_acinar_immature_driver_genes_ferret_acinar.pdf",
     )
 
     # Calculate lineage drivers with acinar proliferating as the terminal state
@@ -241,6 +207,9 @@ def ferret_acinar():
         ncols=3,
         vmax="p96",
         save="_acinar_proliferating_driver_genes_ferret_acinar.pdf",
+    )
+    acinar_prolif_df.to_csv(
+        "csv_files/acinar_proliferating_driver_genes_ferret.csv", index=True
     )
 
     # Calculate lineage drivers with pancreatic progenitor as the terminal state
@@ -292,18 +261,22 @@ def ferret_acinar():
         adata_ferret_acinar,
         basis="umap",
         color=[
-            "ATF3",
-            "BTG2",
+            "AQP8",
+            "CCKAR",
             "CEL",
             "CELA3A",
             "CPA1",
             "CPA2",
+            "CUZD1",
+            "ERP27",
             "GATA4",
+            "GP2",
+            "HNF4G",
             "NFKBIZ",
-            "PTPN3",
+            "PLA2G1B",
+            "PNLIPRP1",
             "RBPJL",
-            "SERPINI2",
-            "XBP1",
+            "XBP1"
         ],
         color_map="viridis",
         s=50,
@@ -311,32 +284,30 @@ def ferret_acinar():
         vmax="p96",
         save="_WA_ferret_acinar.pdf",
     )
+
     # Plot the ferret-specific gene sets and their distribution
     sc.pl.embedding(
         adata_ferret_acinar,
         basis="umap",
         color=[
-            "ARID3A",
+            "BARX2",
+            "BHLHA15",
             "CELA1",
             "CPA4",
             "EGFR",
-            "EGR1",
-            "FOXK2",
-            "GATA6",
+            "ELF3",
+            "ERN1",
+            "IL6ST",
             "KLF15",
-            "KLF6",
             "MYC",
-            "NFIB",
-            "NR4A1",
+            "PDIA2",
             "PRSS3",
-            "STAT3",
-            "TCF7",
-            "VEGFC",
-            "ZBTB16",
+            "RET",
+            "ZBTB16"
         ],
         color_map="viridis",
         s=50,
-        ncols=4,
+        ncols=5,
         vmax="p96",
         save="_FS_ferret_acinar.pdf",
     )
@@ -344,7 +315,7 @@ def ferret_acinar():
     sc.pl.embedding(
         adata_ferret_acinar,
         basis="umap",
-        color=["pseudotime"] + ["fate_probabilities_acinar_maturing"],
+        color=["pseudotime"] + ["fate_probabilities_acinar_proliferating"],
         color_map="viridis",
         s=50,
         ncols=2,
@@ -364,8 +335,8 @@ def ferret_ductal():
     Saves all plots and driver gene tables to disk.
 
     Reads:
-        pseudotime_objects/ferret_ductal_s9e0_pseudotime.csv
-        pseudotime_objects/ferret_ductal_s9e0_lineage_weights.csv
+        pseudotime_objects/ferret_ductal_s26e33_pseudotime.csv
+        pseudotime_objects/ferret_ductal_s26e33_lineage_weights.csv
         pseudotime_objects/ferret_ductal.h5ad
 
     Writes:
@@ -382,18 +353,18 @@ def ferret_ductal():
 
     # Load in pseudotime and weights for this specific ductal lineage
     ferret_ductal_pseudotime = pd.read_csv(
-        "pseudotime_objects/ferret_ductal_s9e0_pseudotime.csv", index_col=0
+        "pseudotime_objects/ferret_ductal_s26e33_pseudotime.csv", index_col=0
     )
     ferret_ductal_weights = pd.read_csv(
-        "pseudotime_objects/ferret_ductal_s9e0_lineage_weights.csv", index_col=0
+        "pseudotime_objects/ferret_ductal_s26e33_lineage_weights.csv", index_col=0
     )
 
     # Load in the h5ad file from the ferret Seurat object
     adata_ferret_ductal = sc.read_h5ad("pseudotime_objects/ferret_ductal.h5ad")
 
     # Specify that we are looking at lineage 3 for this slingshot pseudotime
-    adata_ferret_ductal.obs["pseudotime"] = ferret_ductal_pseudotime["Lineage3"]
-    adata_ferret_ductal.obs["weights"] = ferret_ductal_weights["Lineage3"]
+    adata_ferret_ductal.obs["pseudotime"] = ferret_ductal_pseudotime["Lineage1"]
+    adata_ferret_ductal.obs["weights"] = ferret_ductal_weights["Lineage1"]
 
     # Remove any NaNs, recategorize the majority celltype as a category
     adata_ferret_ductal = adata_ferret_ductal[
@@ -422,11 +393,13 @@ def ferret_ductal():
 
     # Instantiate the GPCCA esimator and fit to the clusters using celltype
     g = cr.estimators.GPCCA(pk)
-    g.fit(cluster_key="final_renamed_celltype", n_states=4)
+    g.fit(cluster_key="final_renamed_celltype", n_states=3)
 
     # Manually set the terminal states after fit, calculate fate probabilities
     g.set_terminal_states(
-        states=["Ductal Immature_1", "Ductal Proliferating", "Ductal Immature_2"]
+        states=['Pancreatic Progenitor',
+                'Ductal Proliferating',
+                'Ductal Immature']
     )
     g.compute_fate_probabilities()
 
@@ -455,57 +428,59 @@ def ferret_ductal():
 
     # Name all celltypes to be driving factors when calculating lineage drivers
     driver_clusters = [
+        "Acinar Proliferating",
+        "Beta",
         "Ductal Immature",
         "Ductal Proliferating",
-        "Pancreatic Progenitor",
-        "Acinar Proliferating",
-        "Acinar Immature",
-        "Acinar Progenitor",
         "Mesenchyme Subtype 1",
+        "Pancreatic Progenitor",
     ]
 
-    # Calculate lineage drivers with ductal immature_1 as the terminal state
-    ductal_immature_1_df = g.compute_lineage_drivers(
-        lineages=["Ductal Immature_1"],
+    # Calculate lineage drivers with ductal immature as the terminal state
+    ductal_immature_df = g.compute_lineage_drivers(
+        lineages=["Ductal Immature"],
         cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
-    adata_ferret_ductal.obs["fate_probabilities_ductal_immature_1"] = (
-        g.fate_probabilities["Ductal Immature_1"].X.flatten()
+    adata_ferret_ductal.obs["fate_probabilities_ductal_immature"] = (
+        g.fate_probabilities["Ductal Immature"].X.flatten()
     )
     # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_ductal,
         basis="umap",
-        color=["fate_probabilities_ductal_immature_1"]
-        + list(ductal_immature_1_df.index[:8]),
+        color=["fate_probabilities_ductal_immature"]
+        + list(ductal_immature_df.index[:8]),
         color_map="viridis",
         s=50,
         ncols=3,
         vmax="p96",
-        save="_ductal_immature_1_driver_genes_ferret_ductal.pdf",
+        save="_ductal_immature_driver_genes_ferret_ductal.pdf",
+    )
+    ductal_immature_df.to_csv(
+        "csv_files/ductal_immature_driver_genes_ferret.csv", index=True
     )
 
-    # Calculate lineage drivers with ductal immature_2 as the terminal state
-    ductal_immature_2_df = g.compute_lineage_drivers(
-        lineages=["Ductal Immature_2"],
+    # Calculate lineage drivers with Pancreatic Progenitor as the terminal state
+    pancreatic_progenitor_df = g.compute_lineage_drivers(
+        lineages=["Pancreatic Progenitor"],
         cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
-    adata_ferret_ductal.obs["fate_probabilities_ductal_immature_2"] = (
-        g.fate_probabilities["Ductal Immature_2"].X.flatten()
+    adata_ferret_ductal.obs["fate_probabilities_pancreatic_progenitor"] = (
+        g.fate_probabilities["Pancreatic Progenitor"].X.flatten()
     )
     # Plot the top 8 genes associated with the pathway next to the fate plot
     sc.pl.embedding(
         adata_ferret_ductal,
         basis="umap",
-        color=["fate_probabilities_ductal_immature_2"]
-        + list(ductal_immature_2_df.index[:8]),
+        color=["fate_probabilities_pancreatic_progenitor"]
+        + list(pancreatic_progenitor_df.index[:8]),
         color_map="viridis",
         s=50,
         ncols=3,
         vmax="p96",
-        save="_ductal_immature_2_driver_genes_ferret_ductal.pdf",
+        save="_pancreatic_progenitor_driver_genes_ferret_ductal.pdf",
     )
 
     # Calculate lineage drivers with acinar proliferating as the terminal state
@@ -514,6 +489,7 @@ def ferret_ductal():
         cluster_key="final_renamed_celltype",
         clusters=driver_clusters,
     )
+
     adata_ferret_ductal.obs["fate_probabilities_ductal_proliferating"] = (
         g.fate_probabilities["Ductal Proliferating"].X.flatten()
     )
@@ -529,9 +505,6 @@ def ferret_ductal():
         vmax="p96",
         save="_ductal_proliferating_driver_genes_ferret_ductal.pdf",
     )
-    ductal_proliferating_df.to_csv(
-        "csv_files/ductal_proliferating_driver_genes_ferret.csv", index=True
-    )
 
     # Plot the well-associated gene sets and their distribution
     sc.pl.embedding(
@@ -539,19 +512,23 @@ def ferret_ductal():
         basis="umap",
         color=[
             "ANXA4",
+            "BICC1",
             "CFTR",
+            "DPP4",
             "EHF",
-            "FGFR2",
             "FGFR3",
             "GLIS3",
             "HNF1B",
-            "NOTCH2",
+            "LAMA1",
+            "LAMB1",
+            "SCTR",
             "SLC4A4",
-            "WLS",
+            "TNFRSF19",
+            "WNT5B"
         ],
         color_map="viridis",
         s=50,
-        ncols=4,
+        ncols=5,
         vmax="p96",
         save="_WA_ferret_ductal.pdf",
     )
@@ -560,22 +537,20 @@ def ferret_ductal():
         adata_ferret_ductal,
         basis="umap",
         color=[
-            "ARID4A",
-            "ATF3",
+            "CA2",
             "EGFR",
+            "ELF3",
+            "HHEX",
             "ITGB4",
+            "KCNK5",
             "NFIB",
             "NFKB1",
-            "STAT3",
-            "TBP",
-            "TSPAN8",
             "VEGFA",
-            "VEGFC",
-            "ZBTB4",
+            "ZBTB4"
         ],
         color_map="viridis",
         s=50,
-        ncols=4,
+        ncols=5,
         vmax="p96",
         save="_FS_ferret_ductal.pdf",
     )
@@ -583,7 +558,7 @@ def ferret_ductal():
     sc.pl.embedding(
         adata_ferret_ductal,
         basis="umap",
-        color=["pseudotime"] + ["fate_probabilities_ductal_proliferating"],
+        color=["pseudotime"] + ["fate_probabilities_ductal_immature"],
         color_map="viridis",
         s=50,
         ncols=2,
@@ -806,18 +781,22 @@ def human_acinar():
         adata_human_acinar,
         basis="umap",
         color=[
-            "ATF3",
-            "BTG2",
+            "AQP8",
+            "CCKAR",
             "CEL",
             "CELA3A",
             "CPA1",
             "CPA2",
+            "CUZD1",
+            "ERP27",
             "GATA4",
+            "GP2",
+            "HNF4G",
             "NFKBIZ",
-            "PTPN3",
+            "PLA2G1B",
+            "PNLIPRP1",
             "RBPJL",
-            "SERPINI2",
-            "XBP1",
+            "XBP1"
         ],
         color_map="viridis",
         s=50,
@@ -830,27 +809,24 @@ def human_acinar():
         adata_human_acinar,
         basis="umap",
         color=[
-            "ARID3A",
+            "BARX2",
+            "BHLHA15",
             "CELA1",
             "CPA4",
             "EGFR",
-            "EGR1",
-            "FOXK2",
-            "GATA6",
+            "ELF3",
+            "ERN1",
+            "IL6ST",
             "KLF15",
-            "KLF6",
             "MYC",
-            "NFIB",
-            "NR4A1",
+            "PDIA2",
             "PRSS3",
-            "STAT3",
-            "TCF7",
-            "VEGFC",
-            "ZBTB16",
+            "RET",
+            "ZBTB16"
         ],
         color_map="viridis",
         s=50,
-        ncols=4,
+        ncols=5,
         vmax="p96",
         save="_FS_human_acinar.pdf",
     )
@@ -1080,19 +1056,23 @@ def human_ductal():
         basis="umap",
         color=[
             "ANXA4",
+            "BICC1",
             "CFTR",
+            "DPP4",
             "EHF",
-            "FGFR2",
             "FGFR3",
             "GLIS3",
             "HNF1B",
-            "NOTCH2",
+            "LAMA1",
+            "LAMB1",
+            "SCTR",
             "SLC4A4",
-            "WLS",
+            "TNFRSF19",
+            "WNT5B"
         ],
         color_map="viridis",
         s=50,
-        ncols=4,
+        ncols=5,
         vmax="p96",
         save="_WA_human_ductal.pdf",
     )
@@ -1101,22 +1081,20 @@ def human_ductal():
         adata_human_ductal,
         basis="umap",
         color=[
-            "ARID4A",
-            "ATF3",
+            "CA2",
             "EGFR",
+            "ELF3",
+            "HHEX",
             "ITGB4",
+            "KCNK5",
             "NFIB",
             "NFKB1",
-            "STAT3",
-            "TBP",
-            "TSPAN8",
             "VEGFA",
-            "VEGFC",
-            "ZBTB4",
+            "ZBTB4"
         ],
         color_map="viridis",
         s=50,
-        ncols=4,
+        ncols=5,
         vmax="p96",
         save="_FS_human_ductal.pdf",
     )

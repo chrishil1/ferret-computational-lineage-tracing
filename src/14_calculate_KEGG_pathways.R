@@ -109,10 +109,18 @@ run_enrichment <- function(query_names,
     theme(axis.text.y = element_text(size = 10))
 
   # Save the bubble plots to the output directory
-  ggsave(file.path(image_dir, "14_KEGG_pathways", paste0("14_", name, "_kegg_recall.pdf")),
+  ggsave(
+    file.path(
+      image_dir, "14_KEGG_pathways",
+      paste0("14_", name, "_kegg_recall.pdf")
+    ),
     plot = bubble_plot, width = 10, height = 8, bg = "white"
   )
-  ggsave(file.path(image_dir, "14_KEGG_pathways", paste0("14_", name, "_kegg_pvalue.pdf")),
+  ggsave(
+    file.path(
+      image_dir, "14_KEGG_pathways",
+      paste0("14_", name, "_kegg_pvalue.pdf")
+    ),
     plot = bubble_plot_p_value, width = 10, height = 8, bg = "white"
   )
 }
@@ -194,14 +202,14 @@ process_and_run(
 
 # Run the processing for ferret acinar driving genes
 process_and_run(
-  file.path(csv_dir, "acinar_maturing_driver_genes_ferret_scaled.csv"),
-  "Acinar.Maturing_qval",
+  file.path(csv_dir, "acinar_proliferating_driver_genes_ferret_scaled.csv"),
+  "Acinar.Proliferating_qval",
   "ferret_acinar"
 )
 
 # Run the processing for ferret ductal driving genes
 process_and_run(
-  file.path(csv_dir, "ductal_proliferating_driver_genes_ferret_scaled.csv"),
-  "Ductal.Proliferating_qval",
+  file.path(csv_dir, "ductal_immature_driver_genes_ferret_scaled.csv"),
+  "Ductal.Immature_qval",
   "ferret_ductal"
 )

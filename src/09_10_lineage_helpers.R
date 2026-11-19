@@ -901,38 +901,76 @@ plot_heatmap <- function(seurat_object,
     pseudotime = colorRampPalette(c("blue", "green", "yellow", "red"))(100)
   )
   
-  # Map Ensembl IDs to gene symbols for row labels
-  ensg_ids     <- rownames(heatmap_scale)
-  mart         <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-  gene_mapping <- getBM(
-    attributes = c("ensembl_gene_id", "external_gene_name"),
-    filters    = "ensembl_gene_id",
-    values     = ensg_ids,
-    mart       = mart
-  )
-  ens_to_gene    <- setNames(gene_mapping$external_gene_name, gene_mapping$ensembl_gene_id)
-  output_mapping <- ifelse(
-    rownames(heatmap_scale) %in% names(ens_to_gene) & ens_to_gene[rownames(heatmap_scale)] != "",
-    ens_to_gene[rownames(heatmap_scale)],
-    rownames(heatmap_scale)
-  )
-  rownames(heatmap_scale) <- as.character(output_mapping)
+  # # Map Ensembl IDs to gene symbols for row labels
+  # ensg_ids     <- rownames(heatmap_scale)
+  # mart         <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+  # gene_mapping <- getBM(
+  #   attributes = c("ensembl_gene_id", "external_gene_name"),
+  #   filters    = "ensembl_gene_id",
+  #   values     = ensg_ids,
+  #   mart       = mart
+  # )
+  # ens_to_gene    <- setNames(gene_mapping$external_gene_name, gene_mapping$ensembl_gene_id)
+  # output_mapping <- ifelse(
+  #   rownames(heatmap_scale) %in% names(ens_to_gene) & ens_to_gene[rownames(heatmap_scale)] != "",
+  #   ens_to_gene[rownames(heatmap_scale)],
+  #   rownames(heatmap_scale)
+  # )
+  # rownames(heatmap_scale) <- as.character(output_mapping)
   
-  heatmap <- pheatmap::pheatmap(heatmap_scale,
-                                cluster_rows       = cluster_rows,
-                                cluster_cols       = cluster_cols,
-                                show_rownames      = plot_rownames,
-                                show_colnames      = FALSE,
-                                annotation_col     = sample_info,
-                                annotation_colors  = annotation_colors,
-                                color              = blueYellow,
-                                border_color       = NA,
-                                legend             = FALSE,
-                                annotation_legend  = FALSE,
-                                annotation_names_row = FALSE,
-                                fontsize_row       = fontsize_row,
-                                clustering_method  = "complete",
-                                silent             = TRUE, ...
+  # Map Ensembl IDs to gene symbols for heatmap row labels
+  original_ids <- rownames(heatmap_scale)
+  
+  # Remove Ensembl version numbers if present
+  clean_ids <- sub("\\.[0-9]+$", "", original_ids)
+  
+  # Initialize mapping
+  mapped_symbols <- rep(NA_character_, length(original_ids))
+  
+  # Find Ensembl IDs available in the annotation database
+  valid_ids <- clean_ids %in% AnnotationDbi::keys(
+    org.Hs.eg.db::org.Hs.eg.db,
+    keytype = "ENSEMBL"
+  )
+  
+  # Map valid Ensembl IDs to gene symbols
+  if (any(valid_ids)) {
+    mapped_symbols[valid_ids] <- unname(
+      AnnotationDbi::mapIds(
+        x         = org.Hs.eg.db::org.Hs.eg.db,
+        keys      = clean_ids[valid_ids],
+        column    = "SYMBOL",
+        keytype   = "ENSEMBL",
+        multiVals = "first"
+      )
+    )
+  }
+  
+  # Use gene symbols when available, otherwise original IDs
+  row_labels <- original_ids
+  
+  has_symbol <- !is.na(mapped_symbols) & nzchar(mapped_symbols)
+  
+  row_labels[has_symbol] <- mapped_symbols[has_symbol]
+  
+  heatmap <- pheatmap::pheatmap(
+    heatmap_scale,
+    cluster_rows          = cluster_rows,
+    cluster_cols          = cluster_cols,
+    show_rownames         = plot_rownames,
+    labels_row            = row_labels,
+    show_colnames         = FALSE,
+    annotation_col        = sample_info,
+    annotation_colors     = annotation_colors,
+    color                 = blueYellow,
+    border_color          = NA,
+    legend                = FALSE,
+    annotation_legend     = FALSE,
+    annotation_names_row  = FALSE,
+    fontsize_row          = fontsize_row,
+    clustering_method     = "complete",
+    silent                = TRUE,
+    ...
   )
   
   if (return_data) {

@@ -49,4 +49,5 @@ install.packages('remotes', repos='https://cloud.r-project.org'); \
 remotes::install_github('satijalab/seurat-data'); \
 remotes::install_github('mojaveazure/seurat-disk'); \
 remotes::install_github('CUAnschutzBDC/scAnalysisR'); \
+remotes::install_github('immunogenomics/presto'); \
 stopifnot(all(c('SeuratData','SeuratDisk','scAnalysisR') %in% installed.packages()[,1]))"

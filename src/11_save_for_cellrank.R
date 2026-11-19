@@ -103,7 +103,7 @@ Convert("pseudotime_objects/human_acinar.h5Seurat", dest = "h5ad")
 # Ferret object saving #
 ########################
 # Subset to ductal clusters only
-ductal_clusters <- c(9, 0, 5, 12, 17)
+ductal_clusters <- c(26, 33, 27, 16, 20, 24, 12, 18, 2)
 ductal_subset <- subset(final_ferret,
   subset = seurat_clusters %in% ductal_clusters
 )
@@ -112,15 +112,15 @@ ductal_subset <- subset(final_ferret,
 sce <- as.SingleCellExperiment(ductal_subset)
 
 # Extract only the top 15 PCs for slingshot object
-pca_subset <- reducedDim(sce, "PCA")[, 1:15]
+pca_subset <- reducedDim(sce, "PCA")[, 1:20]
 
 # Run slingshot object with our decided start/end clusters
 slingshot_sce <- slingshot(
   sce,
   reducedDim = pca_subset,
   clusterLabels = sce$seurat_clusters,
-  start.clus = 9,
-  end.clus = 0
+  start.clus = 26,
+  end.clus = 33
 )
 
 # Extract the pseudotime and lineage weights from the slingshot object
@@ -129,10 +129,10 @@ ductal_ferret_lineage_weights <- slingCurveWeights(slingshot_sce)
 
 # Write pseudotime and lineage weights to output files
 write.csv(ductal_ferret_pseudotime,
-  file = "pseudotime_objects/ferret_ductal_s9e0_pseudotime.csv"
+  file = "pseudotime_objects/ferret_ductal_s26e33_pseudotime.csv"
 )
 write.csv(ductal_ferret_lineage_weights,
-  file = "pseudotime_objects/ferret_ductal_s9e0_lineage_weights.csv"
+  file = "pseudotime_objects/ferret_ductal_s26e33_lineage_weights.csv"
 )
 
 # Convert the ferret object into RNA3 based naming scheme for CellRank
@@ -150,7 +150,7 @@ SaveH5Seurat(ductal_subset,
 Convert("pseudotime_objects/ferret_ductal.h5Seurat", dest = "h5ad")
 
 # Subset to acinar clusters only
-acinar_clusters <- c(9, 4, 14, 1, 16, 8, 11, 10)
+acinar_clusters <- c(26, 33, 3, 6, 14, 4, 10, 17, 34, 23, 7, 29, 19, 31)
 acinar_subset <- subset(final_ferret,
   subset = seurat_clusters %in% acinar_clusters
 )
@@ -159,15 +159,15 @@ acinar_subset <- subset(final_ferret,
 sce <- as.SingleCellExperiment(acinar_subset)
 
 # Extract only the top 15 PCs for slingshot object
-pca_subset <- reducedDim(sce, "PCA")[, 1:15]
+pca_subset <- reducedDim(sce, "PCA")[, 1:20]
 
 # Run slingshot object with our decided start/end clusters
 slingshot_sce <- slingshot(
   sce,
   reducedDim = pca_subset,
   clusterLabels = sce$seurat_clusters,
-  start.clus = 9,
-  end.clus = 10
+  start.clus = 26,
+  end.clus = 19
 )
 
 # Extract the pseudotime and lineage weights from the slingshot object
@@ -176,10 +176,10 @@ acinar_ferret_lineage_weights <- slingCurveWeights(slingshot_sce)
 
 # Write pseudotime and lineage weights to output files
 write.csv(acinar_ferret_pseudotime,
-  file = "pseudotime_objects/ferret_acinar_s9e10_pseudotime.csv"
+  file = "pseudotime_objects/ferret_acinar_s26e19_pseudotime.csv"
 )
 write.csv(acinar_ferret_lineage_weights,
-  file = "pseudotime_objects/ferret_acinar_s9e10_lineage_weights.csv"
+  file = "pseudotime_objects/ferret_acinar_s26e19_lineage_weights.csv"
 )
 
 # Convert the ferret object into RNA3 based naming scheme for CellRank

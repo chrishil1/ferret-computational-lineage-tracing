@@ -52,7 +52,7 @@ run_tradeseq_pipeline <- function(sample_id,
 
   # Find variable features and pull out the counts associated with it
   seurat_object <- FindVariableFeatures(seurat_object, nfeatures = nfeatures)
-  counts <- GetAssayData(seurat_object, slot = "data")
+  counts <- GetAssayData(seurat_object, slot = "counts")
   counts <- counts[rownames(counts) %in% VariableFeatures(seurat_object), ]
 
   # EvaluateK between k_range for best fit
@@ -87,8 +87,8 @@ run_tradeseq_pipeline <- function(sample_id,
 }
 
 # Run for each ferret dataset
-run_tradeseq_pipeline("ferret_ductal_S9E0")
-run_tradeseq_pipeline("ferret_acinar_S9E10")
+run_tradeseq_pipeline("ferret_ductal_S26E33")
+run_tradeseq_pipeline("ferret_acinar_S26E19")
 
 # Run for each human dataset
 run_tradeseq_pipeline("human_ductal_S10E19")

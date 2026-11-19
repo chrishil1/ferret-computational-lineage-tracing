@@ -94,21 +94,23 @@ ferret_subset <- readRDS(
 run_slingshot_subset(
   seurat_obj = ferret_subset,
   cluster_col = "seurat_clusters",
-  clusters = c(9, 0, 5, 12, 17),
-  start_cluster = 9,
-  end_cluster = 0,
-  output_prefix = "ferret_ductal_S9E0",
-  fitgam_dir = fitgam_dir
+  clusters = c(26, 33, 27, 16, 20, 24, 12, 18, 2),
+  start_cluster = 26,
+  end_cluster = 33,
+  output_prefix = "ferret_ductal_S26E33",
+  fitgam_dir = fitgam_dir,
+  n_pcs = 20
 )
 
 run_slingshot_subset(
   seurat_obj = ferret_subset,
   cluster_col = "seurat_clusters",
-  clusters = c(9, 4, 14, 1, 16, 8, 11, 10),
-  start_cluster = 9,
-  end_cluster = 10,
-  output_prefix = "ferret_acinar_S9E10",
-  fitgam_dir = fitgam_dir
+  clusters = c(26, 33, 3, 6, 14, 4, 10, 17, 34, 23, 7, 29, 19, 31),
+  start_cluster = 26,
+  end_cluster = 19,
+  output_prefix = "ferret_acinar_S26E19",
+  fitgam_dir = fitgam_dir,
+  n_pcs = 20
 )
 
 ################

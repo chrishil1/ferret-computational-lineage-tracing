@@ -17,7 +17,6 @@ ferret_object <- readRDS(file.path(
   data_dir,
   "01_ferret_processed_object.rds"
 ))
-ferret_object$day <- gsub("_b2$", "", ferret_object$sample)
 
 # Visualize ferret day distribution in UMAP space
 ferret_day_umap <- plotDimRed(ferret_object,

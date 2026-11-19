@@ -281,14 +281,55 @@ def get_lineage_heatmap(ferret_score, human_score, celltype):
     # Save to our output figure
     fig.savefig(f"figures/13_gene_plot_heatmap_{celltype}.pdf", dpi=fig.dpi)
 
+def get_lineage_gene_table(ferret_score, human_score, celltype):
+    # Merge human and ferret scores
+    df = get_combined_scores(ferret_score, human_score)
+
+    # Define categories
+    human_specific = df[
+        (df["Human"] > 0.7) &
+        (df["Ferret"] <= 0.7)
+    ].copy()
+    human_specific["category"] = "Human-specific"
+
+    ferret_specific = df[
+        (df["Ferret"] > 0.7) &
+        (df["Human"] <= 0.7)
+    ].copy()
+    ferret_specific["category"] = "Ferret-specific"
+
+    combined = df[
+        (df["Human"] > 0.7) &
+        (df["Ferret"] > 0.7)
+    ].copy()
+    combined["category"] = "Combined"
+
+    # Combine all three categories
+    result = pd.concat([
+        combined,
+        human_specific,
+        ferret_specific
+    ])
+
+    # Put columns in desired order
+    result = result[
+        ["gene", "category", "Human", "Ferret"]
+    ]
+
+    # Sort category, then gene
+    result = result.sort_values(
+        ["category", "gene"]
+    )
+
+    return result
 
 if __name__ == "__main__":
     # Define the ferret scores by reading in from files
     ductal_ferret_scores = get_scaled_correlation_scores(
-        "csv_files/ductal_proliferating_driver_genes_ferret.csv", 0, 3, 4
+        "csv_files/ductal_immature_driver_genes_ferret.csv", 0, 3, 4
     )
     acinar_ferret_scores = get_scaled_correlation_scores(
-        "csv_files/acinar_maturing_driver_genes_ferret.csv", 0, 3, 4
+        "csv_files/acinar_proliferating_driver_genes_ferret.csv", 0, 3, 4
     )
 
     # Define the human scores by reading in from files
@@ -306,3 +347,27 @@ if __name__ == "__main__":
     # Get the lineage specific heatmap for the ductal and acinar celltypes
     get_lineage_heatmap(acinar_ferret_scores[0], acinar_human_scores[0], "Acinar")
     get_lineage_heatmap(ductal_ferret_scores[0], ductal_human_scores[0], "Ductal")
+
+
+    acinar_genes = get_lineage_gene_table(
+        acinar_ferret_scores[0],
+        acinar_human_scores[0],
+        "Acinar"
+    )
+
+    ductal_genes = get_lineage_gene_table(
+        ductal_ferret_scores[0],
+        ductal_human_scores[0],
+        "Ductal"
+    )
+
+    # Save
+    acinar_genes.to_csv(
+        "csv_files/acinar_lineage_driver_genes_supplemental.csv",
+        index=False
+    )
+
+    ductal_genes.to_csv(
+        "csv_files/ductal_lineage_driver_genes_supplemental.csv",
+        index=False
+    )

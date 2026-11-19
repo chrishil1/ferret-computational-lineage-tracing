@@ -2,6 +2,9 @@ library(biomaRt)
 library(dplyr)
 library(here)
 library(Seurat)
+library(org.Hs.eg.db)
+library(rtracklayer)
+library(dplyr)
 
 source(here("src/common_setup.R"))
 options(Seurat.object.assay.version = "v3")
@@ -64,35 +67,38 @@ new_ferret_object <- CreateSeuratObject(
 new_ferret_object <- NormalizeData(new_ferret_object)
 new_ferret_object <- FindVariableFeatures(new_ferret_object)
 new_ferret_object <- ScaleData(new_ferret_object)
-new_ferret_object <- RunPCA(new_ferret_object, npcs = 15)
-new_ferret_object <- FindNeighbors(new_ferret_object, dims = 1:15)
+new_ferret_object <- RunPCA(new_ferret_object, npcs = 20)
+new_ferret_object <- FindNeighbors(new_ferret_object, dims = 1:20)
 new_ferret_object <- FindClusters(new_ferret_object, resolution = 0.8)
-new_ferret_object <- RunUMAP(new_ferret_object, reduction = "pca", dims = 1:15)
+new_ferret_object <- RunUMAP(new_ferret_object, reduction = "pca", dims = 1:20)
 
-# Convert the human ENSG codes to gene IDs
-mart <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+gtf_file <- here("Homo_sapiens.GRCh38.95.gtf")
+gtf_data <- import(gtf_file)
+gtf_df <- as.data.frame(gtf_data)
+
+# Extract unique gene_id and gene_name (or gene_symbol) pairs
+gene_mapping <- gtf_df %>%
+  dplyr::select(gene_id, gene_name) %>%
+  distinct() %>%
+  filter(!is.na(gene_id) & !is.na(gene_name))
+
+# Extract Ensembl IDs from the human Seurat object
 ensg_ids <- rownames(human_object)
 
-# Get the biomart mapping for the human ensembl and gene symbols
-gene_mapping <- getBM(
-  attributes = c("ensembl_gene_id", "hgnc_symbol"),
-  filters = "ensembl_gene_id",
-  values = ensg_ids,
-  mart = mart
-)
+# Match Ensembl IDs to gene symbols
+matched_gene_names <- gene_mapping$gene_name[
+  match(ensg_ids, gene_mapping$gene_id)
+]
 
-# Create a mapping of the match gene names for the human
-matched_gene_names <-
-  gene_mapping$hgnc_symbol[match(
-    rownames(human_object),
-    gene_mapping$ensembl_gene_id
-  )]
-
-# Apply the mapping if a non-empty entry exists
-new_rownames <- ifelse(!is.na(matched_gene_names) & matched_gene_names != "",
+# Use gene symbol if available; otherwise retain Ensembl ID
+new_rownames <- ifelse(
+  !is.na(matched_gene_names) & matched_gene_names != "",
   matched_gene_names,
-  rownames(human_object)
+  ensg_ids
 )
+
+# Remove names attribute, if present
+new_rownames <- unname(new_rownames)
 
 # Extract counts data from SCTransformed human data
 count_data <- GetAssayData(
@@ -147,6 +153,18 @@ final_ferret[["RNA"]] <- NULL
 final_ferret <- RenameAssays(object = final_ferret, RNA3 = "RNA")
 final_ferret[["RNA"]]$data <- NULL
 final_ferret[["RNA"]]$scale.data <- NULL
+
+final_ferret <- NormalizeData(final_ferret)
+final_ferret <- FindVariableFeatures(final_ferret)
+final_ferret <- ScaleData(final_ferret)
+final_ferret <- RunPCA(final_ferret, npcs = 20)
+final_ferret <- FindNeighbors(final_ferret, dims = 1:20)
+final_ferret <- FindClusters(final_ferret, resolution = 3.5)
+final_ferret <- RunUMAP(final_ferret, reduction = "pca", dims = 1:20)
+
+# Set clustering to RNA resolution 3.5
+final_ferret$seurat_clusters <- final_ferret$RNA_snn_res.3.5
+Idents(final_ferret) <- "seurat_clusters"
 
 saveRDS(final_ferret, file.path(data_dir, "05_final_ferret.rds"))
 

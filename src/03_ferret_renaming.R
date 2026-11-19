@@ -18,10 +18,12 @@ ferret_knn_object <- subset(merged_object, subset = batch == "Ferret")
 ferret_knn_object <- NormalizeData(ferret_knn_object) %>%
   FindVariableFeatures() %>%
   ScaleData() %>%
-  RunPCA(npcs = 15) %>%
-  FindNeighbors(dims = 1:15) %>%
+  RunPCA(npcs = 20) %>%
+  FindNeighbors(dims = 1:20) %>%
   FindClusters(resolution = 0.8) %>%
-  RunUMAP(reduction = "pca", dims = 1:15)
+  RunUMAP(reduction = "pca", dims = 1:20)
+
+DimPlot(ferret_knn_object, group.by = "knn_celltype", label = TRUE)
 
 # Visualize the knn cell labels from the human dataset integration
 ferret_knn_umap <- plotDimRed(ferret_knn_object,
@@ -41,8 +43,8 @@ dev.off()
 
 # Calculate the resolution 7 clustering
 ferret_res_7_object <- NormalizeData(ferret_knn_object) %>%
-  FindClusters(resolution = 7) %>%
-  RunUMAP(reduction = "pca", dims = 1:15)
+  FindClusters(resolution = 7.7) %>%
+  RunUMAP(reduction = "pca", dims = 1:20)
 
 # For each res 7 cluster, find the majority knn_celltype and use it to rename
 cluster_labels <- ferret_res_7_object@meta.data %>%
@@ -65,7 +67,7 @@ ferret_res_7_object@meta.data$majority_celltype <- cluster_map[
 
 # Visualize the resolution 7 seurat clusters used for majority renaming
 ferret_sc_majority <- plotDimRed(ferret_res_7_object,
-  col_by = "RNA_snn_res.7",
+  col_by = "RNA_snn_res.7.7",
   plot_type = "umap",
   ggrastr = TRUE
 )[[1]]
@@ -100,12 +102,12 @@ ferret_res_7_object$final_renamed_celltype <-
 
 # Retrieve the 0.8 resolution plot to perform final renaming
 ferret_final_majority <- NormalizeData(ferret_res_7_object) %>%
-  FindClusters(resolution = 0.8) %>%
-  RunUMAP(reduction = "pca", dims = 1:15)
+  FindClusters(resolution = 1) %>%
+  RunUMAP(reduction = "pca", dims = 1:20)
 
 # Visualize the Seurat clusters that gave rise to this manual renaming
 ferret_seurat_clusters <- plotDimRed(ferret_final_majority,
-  col_by = "RNA_snn_res.0.8",
+  col_by = "RNA_snn_res.1",
   plot_type = "umap", ggrastr = TRUE
 )[[1]]
 
@@ -117,21 +119,26 @@ pdf(
 print(ferret_seurat_clusters)
 dev.off()
 
-# Relabel cells in cluster 0 manually to be ductal immature
-cluster0_cells <- WhichCells(ferret_final_majority, idents = "0")
-ferret_final_majority$final_renamed_celltype[cluster0_cells] <- "Ductal Immature"
+cluster_renames <- c(
+  "13" = "Delta",
+  "8" = "Alpha",
+  "4" = "Beta",
+  "7" = "Beta",
+  "15" = "Beta",
+  "16" = "Beta",
+  "0" = "Ductal Immature"
+)
 
-# Relabel cells in cluster 13 manually to be delta
-cluster13_cells <- WhichCells(ferret_final_majority, idents = "13")
-ferret_final_majority$final_renamed_celltype[cluster13_cells] <- "Delta"
+# Only 10 cells belong to Ductal Maturing
+ferret_final_majority$final_renamed_celltype[
+  ferret_final_majority$final_renamed_celltype == "Ductal Maturing"
+] <- "Ductal Proliferating"
 
-# Relabel cells in cluster 7 manually to be alpha
-cluster7_cells <- WhichCells(ferret_final_majority, idents = "7")
-ferret_final_majority$final_renamed_celltype[cluster7_cells] <- "Alpha"
-
-# Relabel cells in cluster 2 manually to be beta
-cluster2_cells <- WhichCells(ferret_final_majority, idents = "2")
-ferret_final_majority$final_renamed_celltype[cluster2_cells] <- "Beta"
+# Apply all renamings
+for (cluster in names(cluster_renames)) {
+  cells <- WhichCells(ferret_final_majority, idents = cluster)
+  ferret_final_majority$final_renamed_celltype[cells] <- cluster_renames[[cluster]]
+}
 
 # Visualize the resulting cluster renaming here
 ferret_final_majority_umap <- plotDimRed(ferret_final_majority,
@@ -147,6 +154,23 @@ pdf(
 )
 print(ferret_final_majority_umap)
 dev.off()
+
+# Visualize the original days here
+ferret_day_umap <- plotDimRed(ferret_final_majority,
+  col_by = "day",
+  color = c("#4285F4", "#34A853", "#FBBC05", "#EA4335"),
+  plot_type = "umap",
+  ggrastr = TRUE
+)[[1]]
+
+pdf(
+  file = file.path(image_dir, "03_ferret_day_umap.pdf"),
+  width = 7,
+  height = 6
+)
+print(ferret_day_umap)
+dev.off()
+
 
 # Visualize barplot of the ferret majority cell types across the 4 timepoints
 ferret_majority_barplot <- create_barplot(
@@ -173,11 +197,10 @@ ferret_majority_heatmap <-
     upregulated = TRUE,
     palette = blue_yellow,
     custom_order = c(
-      "T lymphocyte", "Delta", "Beta", "Alpha", "B lymphocyte",
-      "Ductal Immature", "Mesenchyme Subtype 1", "Ductal Proliferating",
-      "Acinar Proliferating", "Mesenchyme Subtype 2", "Endothelial Lymphatic",
-      "Acinar Immature", "Acinar Maturing", "Acinar Progenitor",
-      "Pancreatic Progenitor"
+      "Acinar Immature", "Acinar Maturing", "Acinar Proliferating",
+      "Endothelial Lymphatic", "Pancreatic Progenitor", "Delta",
+      "Alpha", "Ductal Immature", "Ductal Proliferating",
+      "Mono-Macrophage", "Beta", "Mesenchyme Subtype 1", "B lymphocyte"
     )
   )
 

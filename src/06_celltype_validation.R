@@ -11,13 +11,14 @@ ggplot2::theme_set(ggplot2::theme_classic(base_size = 10))
 
 # Define the cell types that are found in both datasets
 shared_celltypes <- c(
-  "Alpha", "Beta", "Delta", "Pancreatic Progenitor", "Acinar Immature",
-  "Acinar Maturing", "Acinar Progenitor", "Acinar Proliferating",
-  "Ductal Immature", "Ductal Proliferating"
+  "Acinar Immature", "Acinar Maturing", "Alpha", "Beta", "Delta",
+  "Ductal Immature", "Ductal Proliferating", "Acinar Proliferating",
+  "Pancreatic Progenitor"
 )
 
 # Load in Seurat objects for the two species
 ferret_object <- readRDS(file.path(data_dir, "05_final_ferret.rds"))
+
 human_object <- readRDS(file.path(data_dir, "05_final_human.rds"))
 human_subset <- subset(human_object, subset = Celltype %in% shared_celltypes)
 
@@ -55,14 +56,15 @@ for (celltype in shared_celltypes) {
     arrange(cluster, desc(avg_log2FC)) %>%
     slice_head(n = 2000)
 
-  # Intersect, then keep only the top 100 genes in both datasets
   intersected <- intersect(
     ferret_celltype_genes$gene,
     human_celltype_genes$gene
   )
-  top100 <- head(intersected, 100)
 
-  assign(paste0("intersected_genes_", suffix), top100)
+  assign(
+    paste0("intersected_genes_", suffix),
+    intersected
+  )
 }
 
 combined_gene_list <- lapply(shared_celltypes, function(celltype) {
@@ -70,7 +72,9 @@ combined_gene_list <- lapply(shared_celltypes, function(celltype) {
 })
 names(combined_gene_list) <- make_varname(shared_celltypes)
 
-combined_genes_unique <- unname(unlist(combined_gene_list))
+combined_genes_unique <- unique(
+  unlist(combined_gene_list, use.names = FALSE)
+)
 
 # Calculate the initial ferret heatmap including all genes extracted
 initial_ferret_heatmap <- get_validation_heatmap(
@@ -96,29 +100,72 @@ initial_human_heatmap <- get_validation_heatmap(
 expr_ferret <- initial_ferret_heatmap$expression_data
 expr_human <- initial_human_heatmap$expression_data
 
-genes_per_cluster <- list()
-all_genes_ordered <- c()
+# Minimum z-score required in both species
+z_threshold <- 1.5
 
-# For each celltype, only extract the genes that had high expression z-scores
-# (> 2) in both species datasets
-for (cluster in shared_celltypes) {
-  if (cluster %in% colnames(expr_ferret) && cluster %in% colnames(expr_human)) {
-    genes_ferret_high <- rownames(expr_ferret)[expr_ferret[, cluster] > 2]
-    genes_human_high <- rownames(expr_human)[expr_human[, cluster] > 2]
-    common_genes <- intersect(
-      intersect(genes_ferret_high, genes_human_high),
-      combined_genes_unique
+# Maximum number of genes per cell type for final heatmaps
+top_n <- 50
+
+genes_per_cluster <- setNames(
+  lapply(shared_celltypes, function(ct) {
+    # Only consider shared DE markers for this cell type
+    candidates <- combined_gene_list[[make_varname(ct)]]
+
+    # Keep genes present in both expression matrices
+    candidates <- intersect(
+      candidates,
+      intersect(rownames(expr_ferret), rownames(expr_human))
     )
-    genes_per_cluster[[cluster]] <- common_genes
-  }
-}
 
-# Extract all of these genes per cluster into a final list
-for (cluster in shared_celltypes) {
-  if (cluster %in% names(genes_per_cluster)) {
-    all_genes_ordered <- c(all_genes_ordered, genes_per_cluster[[cluster]])
-  }
-}
+    # Require enrichment in BOTH species
+    keep <- is.finite(expr_ferret[candidates, ct]) &
+      is.finite(expr_human[candidates, ct]) &
+      expr_ferret[candidates, ct] > z_threshold &
+      expr_human[candidates, ct] > z_threshold
+
+    candidates[keep]
+  }),
+  shared_celltypes
+)
+
+# Rank passing genes by conserved log2FC
+ranked_tables <- setNames(
+  lapply(shared_celltypes, function(ct) {
+    genes <- genes_per_cluster[[ct]]
+
+    # Ferret differential expression
+    f <- ferret_genes %>%
+      filter(.data$cluster == ct, gene %in% genes) %>%
+      distinct(gene, .keep_all = TRUE) %>%
+      transmute(gene, Ferret_FC = avg_log2FC)
+
+    # Human differential expression
+    h <- human_genes %>%
+      filter(.data$cluster == ct, gene %in% genes) %>%
+      distinct(gene, .keep_all = TRUE) %>%
+      transmute(gene, Human_FC = avg_log2FC)
+
+    # Rank by minimum fold change across species
+    inner_join(f, h, by = "gene") %>%
+      filter(Ferret_FC > 0.5, Human_FC > 0.5) %>%
+      mutate(Score = pmin(Ferret_FC, Human_FC)) %>%
+      arrange(desc(Score), gene) %>%
+      mutate(Rank = row_number())
+  }),
+  shared_celltypes
+)
+
+# Keep the top N genes per cell type
+ranked_genes_per_cluster <- lapply(
+  ranked_tables,
+  function(tbl) head(tbl$gene, top_n)
+)
+
+# Combine selected genes for final heatmaps
+all_genes_ordered <- unique(unlist(
+  ranked_genes_per_cluster,
+  use.names = FALSE
+))
 
 # Calculate a 2nd iteration of the ferret heatmap using the identified genes
 final_ferret_heatmap <- get_validation_heatmap(

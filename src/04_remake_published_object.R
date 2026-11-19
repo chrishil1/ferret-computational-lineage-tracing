@@ -41,7 +41,10 @@ merged_so <- SCTransform(merged_so)
 merged_so <- ScaleData(merged_so)
 
 # Read in published seurat object
-published_object <- readRDS(file.path(data_dir, "human-fetal-panc-allcells.rds"))
+published_object <- readRDS(file.path(
+  data_dir,
+  "human-fetal-panc-allcells.rds"
+))
 
 # Subset merged object by cells that are included in final published object
 pub_cells <- Cells(published_object)
@@ -71,10 +74,10 @@ subset_seurat <- RunUMAP(subset_seurat,
 
 # Visualize human PCW distribution in UMAP space
 human_pcw_umap <- plotDimRed(subset_seurat,
-                             col_by = "PCW",
-                             color = c("#4285F4", "#FBBC05", "#EA4335"),
-                             plot_type = "umap",
-                             ggrastr = TRUE
+  col_by = "PCW",
+  color = c("#4285F4", "#FBBC05", "#EA4335"),
+  plot_type = "umap",
+  ggrastr = TRUE
 )[[1]]
 
 pdf(
@@ -87,10 +90,10 @@ dev.off()
 
 # Visualize human celltype distribution in UMAP space
 human_celltype_umap <- plotDimRed(subset_seurat,
-                                  col_by = "Celltype",
-                                  plot_type = "umap",
-                                  color = human_palette,
-                                  ggrastr = TRUE
+  col_by = "Celltype",
+  plot_type = "umap",
+  color = human_palette,
+  ggrastr = TRUE
 )[[1]]
 
 pdf(
