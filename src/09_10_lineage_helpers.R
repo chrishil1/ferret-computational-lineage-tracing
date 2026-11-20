@@ -739,7 +739,7 @@ make_lineage_heatmaps <- function(slingshot_sce,
   # write.csv(filtered_genes_res, file.path(save_dir, "fitgam_findmarkers_sig_genes.csv"))
   
   filtered_res_high <- filtered_res %>% dplyr::filter(waldStat > waldcutoff)
-  # write.csv(filtered_res_high, file.path(save_dir, "fitgam_waldcutoff_genes.csv"))
+  #write.csv(filtered_res_high, file.path(save_dir, "fitgam_waldcutoff_genes.csv"))
   
   pseudotime        <- slingPseudotime(slingshot_sce, na = TRUE)[, lineage]
   pseudotime        <- as.vector(pseudotime)
@@ -755,6 +755,7 @@ make_lineage_heatmaps <- function(slingshot_sce,
   seurat_sub           <- seurat_sub[, ordered_cells_subset]
   
   top_genes      <- rownames(head(filtered_res, 200))
+  write.csv(head(filtered_res, 200), file.path(csv_dir, "top_genes.csv"))
   #top_genes      <- top_genes[top_genes %in% rownames(expr_mat)]
   expr_mat       <- GetAssayData(seurat_sub, layer = "data", assay = "RNA")
   expr_mat       <- expr_mat[top_genes, ordered_cells_subset, drop = FALSE]
